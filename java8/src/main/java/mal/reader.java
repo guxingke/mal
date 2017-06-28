@@ -40,6 +40,26 @@ public class reader {
       case "[":
       case "{":
         return read_list(reader);
+      case "'":
+        reader.next();
+        return new MalQuote(read_form(reader));
+      case "`":
+        reader.next();
+        return new MalQuasiQuote(read_form(reader));
+      case "~":
+        reader.next();
+        return new MalUnQuote(read_form(reader));
+      case "@":
+        reader.next();
+        return new MalDeref(read_form(reader));
+      case "~@":
+        reader.next();
+        return new MalSpliceUnquote(read_form(reader));
+      case "^":
+        reader.next();
+        MalType meta = read_form(reader);
+        reader.next();
+        return new MalWithMeta(read_form(reader), meta);
       default:
         return read_atom(reader);
     }

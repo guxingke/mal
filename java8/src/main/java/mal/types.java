@@ -1,12 +1,13 @@
 package mal;
 
+import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * @author gxk
- * @since 2017/6/28 ÏÂÎç7:17
+ * @since 2017/6/28 ï¿½ï¿½ï¿½ï¿½7:17
  */
 public class types {
 
@@ -31,12 +32,102 @@ class MalList extends MalType {
 
   @Override
   public String toString() {
-//    if (malTypeList.isEmpty()) {
-//      return "()";
-//    }
     return malTypeList.stream()
         .map(MalType::toString)
         .collect(Collectors.joining(" ", this.left, this.right));
+  }
+}
+
+class MalQuote extends MalType {
+  private String key;
+  private MalType mal;
+
+  MalQuote(MalType type) {
+    this.mal = type;
+    key = "quote";
+  }
+
+  @Override
+  public String toString() {
+    return "(" + key + " " + mal.toString() + ")";
+  }
+}
+
+class MalUnQuote extends MalType {
+  private String key;
+  private MalType mal;
+
+  MalUnQuote(MalType type) {
+    this.mal = type;
+    key = "unquote";
+  }
+
+  @Override
+  public String toString() {
+    return "(" + key + " " + mal.toString() + ")";
+  }
+}
+
+class MalDeref extends MalType {
+  private String key;
+  private MalType mal;
+
+  MalDeref(MalType type) {
+    this.mal = type;
+    key = "deref";
+  }
+
+  @Override
+  public String toString() {
+    return "(" + key + " " + mal.toString() + ")";
+  }
+}
+
+class MalSpliceUnquote extends MalType {
+  private String key;
+  private MalType mal;
+
+  MalSpliceUnquote(MalType type) {
+    this.mal = type;
+    key = "splice-unquote";
+  }
+
+  @Override
+  public String toString() {
+    return "(" + key + " " + mal.toString() + ")";
+  }
+}
+
+class MalWithMeta extends MalType {
+  MalType meta;
+  MalType mal;
+  String key;
+
+  MalWithMeta(MalType mal, MalType meta) {
+    this.mal = mal;
+    this.meta = meta;
+    this.key = "with-meta";
+  }
+
+  @Override
+  public String toString() {
+    return "(" + key + " " + mal.toString() + " " + meta.toString() + ")";
+  }
+}
+
+
+class MalQuasiQuote extends MalType {
+  private String key;
+  private MalType mal;
+
+  MalQuasiQuote(MalType type) {
+    this.mal = type;
+    key = "quasiquote";
+  }
+
+  @Override
+  public String toString() {
+    return "(" + key + " " + mal.toString() + ")";
   }
 }
 
