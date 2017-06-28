@@ -75,30 +75,32 @@ public class reader {
 
     return new MalSymbol(token);
   }
+
+  static class Reader {
+    List<String> tokens;
+    int position;
+
+    Reader(List<String> tokens) {
+      this.tokens = tokens;
+      this.position = 0;
+    }
+
+    String next() {
+      if (position == tokens.size()) {
+        return null;
+      }
+      String token = tokens.get(position);
+      position++;
+      return token;
+    }
+
+    String peek() {
+      if (position == tokens.size()) {
+        return null;
+      }
+      return tokens.get(position);
+    }
+  }
 }
 
-class Reader {
-  List<String> tokens;
-  int position;
 
-  Reader(List<String> tokens) {
-    this.tokens = tokens;
-    this.position = 0;
-  }
-
-  String next() {
-    if (position == tokens.size()) {
-      return null;
-    }
-    String token = tokens.get(position);
-    position++;
-    return token;
-  }
-
-  String peek() {
-    if (position == tokens.size()) {
-      return null;
-    }
-    return tokens.get(position);
-  }
-}
