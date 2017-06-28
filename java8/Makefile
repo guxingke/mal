@@ -7,7 +7,7 @@ all: $(JARS)
 
 
 %.jar:
-	mvn package -DmainClass=mal.$* -Dstep=$*
+	mvn -quiet package -DmainClass=mal.$* -Dstep=$*
 	cp target/$*.jar $@
 
 #.PHONY: stats tests $(TESTS)
