@@ -127,3 +127,8 @@ common-lisp/hist/*
 livescript/*.js
 !livescript/node_readline.js
 livescript/node_modules
+
+java8/target
+java8/.idea
+java8/*.iml
+java8/*.jar
