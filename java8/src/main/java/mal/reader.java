@@ -121,6 +121,14 @@ public class reader {
       return tokens.get(position);
     }
   }
+
+  static class EOFException extends RuntimeException {
+    String msg;
+
+    EOFException(String msg) {
+      this.msg = msg;
+    }
+  }
 }
 
 

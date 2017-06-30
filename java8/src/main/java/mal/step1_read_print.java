@@ -32,17 +32,10 @@ public class step1_read_print {
 
       try {
         System.out.println(rep(line));
-      } catch (EOFException e) {
+      } catch (reader.EOFException e) {
         System.out.println(e.msg);
       }
     }
   }
 }
 
-class EOFException extends RuntimeException {
-  String msg;
-
-  EOFException(String msg) {
-    this.msg = msg;
-  }
-}
