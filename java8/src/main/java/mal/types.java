@@ -167,7 +167,7 @@ class MalInt implements MalType {
     return new MalInt(a.value - b.value);
   }
 
-  public static MalInt mult(MalInt a, MalInt b) {
+  public static MalInt multi(MalInt a, MalInt b) {
     return new MalInt(a.value * b.value);
   }
 
@@ -235,5 +235,10 @@ class MalString implements MalType {
 
   MalString(String value) {
     this.value = value;
+  }
+
+  @Override
+  public String toString() {
+    return this.value;
   }
 }

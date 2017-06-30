@@ -19,6 +19,11 @@ public class step2_eval {
       }
 
       MalList ast = ((MalList) eval_ast(val));
+
+      if (!(ast.get(0) instanceof MalIntFun)) {
+        return ast;
+      }
+
       MalIntFun fun = (MalIntFun) ast.get(0);
       return fun.apply(((MalInt) ast.get(1)), ((MalInt) ast.get(2)));
     }
@@ -38,18 +43,31 @@ public class step2_eval {
   static {
     env.put(MalAddSymbol.class, MalInt::add);
     env.put(MalSubSymbol.class, MalInt::sub);
-    env.put(MalMultiSymbol.class, MalInt::mult);
+    env.put(MalMultiSymbol.class, MalInt::multi);
     env.put(MalDivSymbol.class, MalInt::div);
   }
 
   public static MalType eval_ast(MalType ast) {
     if (ast instanceof MalSymbol) {
+      if (!env.containsKey(ast.getClass())) {
+        throw new reader.EOFException(" ");
+      }
+
       return env.get(ast.getClass());
     }
 
     MalList rets = new MalLList();
     if (ast instanceof MalList) {
       MalList list = (MalList) ast;
+
+      if ("[".equals(list.left)) {
+        rets = new MalMList();
+      }
+
+      if ("{".equals(list.left)) {
+        rets = new MalLList();
+      }
+
       for (int i=0; i< list.size(); i++) {
         rets.add(EVAL(list.get(i)));
       }

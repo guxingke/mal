@@ -1,7 +1,5 @@
 package mal;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -84,12 +82,20 @@ public class reader {
       }
     }
 
+    reader.next();
     return malList;
   }
 
   static MalType read_atom(Reader reader) {
     String token = reader.next();
-    if (StringUtils.isNumeric(token)) {
+    Integer tryParse = null;
+    try {
+      tryParse = Integer.parseInt(token);
+    } catch (NumberFormatException e) {
+      // pass
+    }
+
+    if (tryParse != null) {
       return new MalInt(Integer.parseInt(token));
     }
 
@@ -102,6 +108,15 @@ public class reader {
         return new MalDivSymbol();
       case "*":
         return new MalMultiSymbol();
+    }
+
+    // "a"
+    if (token.startsWith("\"")) {
+      return new MalString(token);
+    }
+    // ":a" , mal string for temporary
+    if (token.startsWith(":")) {
+      return new MalString(token);
     }
 
     return new MalSymbol(token);
