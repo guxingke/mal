@@ -1,14 +1,9 @@
 package mal;
 
-import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @author gxk
- * @since 2017/6/28 ����7:17
- */
 public class types {
 
 }

@@ -3,18 +3,18 @@ package mal;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-public class step0_repl {
-  
-  public static String READ(String val) {
-    return val;
+public class step2_eval {
+
+  public static MalType READ(String val) {
+    return reader.read_str(val);
   }
 
-  public static String EVAL(String val) {
+  public static MalType EVAL(MalType val) {
     return val;
   }
   
-  public static String PRINT(String val) {
-    return val;
+  public static String PRINT(MalType val) {
+    return printer.pr_str(val);
   }
 
   public static String rep(String val) {
@@ -29,7 +29,13 @@ public class step0_repl {
       if (line == null) {
         break;
       }
-      System.out.println(rep(line));
+
+      try {
+        System.out.println(rep(line));
+      } catch (reader.EOFException e) {
+        System.out.println(e.msg);
+      }
     }
   }
 }
+
