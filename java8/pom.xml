@@ -5,12 +5,12 @@
     <groupId>com.guxingke</groupId>
     <artifactId>mal</artifactId>
     <packaging>jar</packaging>
-    <version>step0</version>
+    <version>step2</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>mal.step0_repl</mainClass>
-      <step>step0_repl</step>
+        <mainClass>mal.step2_repl</mainClass>
+      <step>step2_repl</step>
     </properties>
 
     <dependencies>
