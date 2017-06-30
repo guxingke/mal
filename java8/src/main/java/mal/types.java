@@ -8,17 +8,25 @@ public class types {
 
 }
 
-class MalType {
+interface MalType {
 
 }
 
-class MalList extends MalType {
+class MalList implements MalType {
   protected List<MalType> malTypeList;
   protected String left = "(";
   protected String right = ")";
 
   MalList() {
     this.malTypeList = new ArrayList<>();
+  }
+
+  public final int size() {
+    return this.malTypeList.size();
+  }
+
+  public MalType get(int index) {
+    return this.malTypeList.get(index);
   }
 
   protected void add(MalType malType) {
@@ -33,7 +41,7 @@ class MalList extends MalType {
   }
 }
 
-class MalQuote extends MalType {
+class MalQuote implements MalType {
   private String key;
   private MalType mal;
 
@@ -48,7 +56,7 @@ class MalQuote extends MalType {
   }
 }
 
-class MalUnQuote extends MalType {
+class MalUnQuote implements MalType {
   private String key;
   private MalType mal;
 
@@ -63,7 +71,7 @@ class MalUnQuote extends MalType {
   }
 }
 
-class MalDeref extends MalType {
+class MalDeref implements MalType {
   private String key;
   private MalType mal;
 
@@ -78,7 +86,7 @@ class MalDeref extends MalType {
   }
 }
 
-class MalSpliceUnquote extends MalType {
+class MalSpliceUnquote implements MalType {
   private String key;
   private MalType mal;
 
@@ -93,7 +101,7 @@ class MalSpliceUnquote extends MalType {
   }
 }
 
-class MalWithMeta extends MalType {
+class MalWithMeta implements MalType {
   MalType meta;
   MalType mal;
   String key;
@@ -111,7 +119,7 @@ class MalWithMeta extends MalType {
 }
 
 
-class MalQuasiQuote extends MalType {
+class MalQuasiQuote implements MalType {
   private String key;
   private MalType mal;
 
@@ -144,11 +152,27 @@ class MalLList extends MalList {
   }
 }
 
-class MalInt extends MalType {
+class MalInt implements MalType {
   Integer value;
 
   MalInt(int value) {
     this.value = value;
+  }
+
+  public static MalInt add(MalInt a, MalInt b) {
+    return new MalInt(a.value + b.value);
+  }
+
+  public static MalInt sub(MalInt a, MalInt b) {
+    return new MalInt(a.value - b.value);
+  }
+
+  public static MalInt mult(MalInt a, MalInt b) {
+    return new MalInt(a.value * b.value);
+  }
+
+  public static MalInt div(MalInt a, MalInt b) {
+    return new MalInt(a.value / b.value);
   }
 
   @Override
@@ -157,7 +181,7 @@ class MalInt extends MalType {
   }
 }
 
-class MalSymbol extends MalType {
+class MalSymbol implements MalType {
   String value;
 
   MalSymbol(String token) {
@@ -170,47 +194,43 @@ class MalSymbol extends MalType {
   }
 }
 
-class MalAddSymbol extends MalType {
-  @Override
-  public String toString() {
-    return "+";
+class MalAddSymbol extends MalSymbol {
+  MalAddSymbol() {
+    super("+");
   }
 }
 
-class MalSubSymbol extends MalType {
-  @Override
-  public String toString() {
-    return "-";
+class MalSubSymbol extends MalSymbol {
+  MalSubSymbol() {
+    super("-");
   }
 }
 
-class MalMultiSymbol extends MalType {
-  @Override
-  public String toString() {
-    return "*";
+class MalMultiSymbol extends MalSymbol {
+  MalMultiSymbol() {
+    super("*");
   }
 }
 
-class MalDivSymbol extends MalType {
-  @Override
-  public String toString() {
-    return "/";
+class MalDivSymbol extends MalSymbol {
+  MalDivSymbol() {
+    super("/");
   }
 }
 
-class MalNil extends MalType {
+class MalNil implements MalType {
 
 }
 
-class MalTrue extends MalType {
+class MalTrue implements MalType {
 
 }
 
-class MalFalse extends MalType {
+class MalFalse implements MalType {
 
 }
 
-class MalString extends MalType {
+class MalString implements MalType {
   String value;
 
   MalString(String value) {

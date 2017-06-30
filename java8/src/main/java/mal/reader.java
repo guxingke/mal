@@ -93,6 +93,17 @@ public class reader {
       return new MalInt(Integer.parseInt(token));
     }
 
+    switch (token) {
+      case "+":
+        return new MalAddSymbol();
+      case "-":
+        return new MalSubSymbol();
+      case "/":
+        return new MalDivSymbol();
+      case "*":
+        return new MalMultiSymbol();
+    }
+
     return new MalSymbol(token);
   }
 
