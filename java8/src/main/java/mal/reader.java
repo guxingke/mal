@@ -56,7 +56,6 @@ public class reader {
       case "^":
         reader.next();
         MalType meta = read_form(reader);
-        reader.next();
         return new MalWithMeta(read_form(reader), meta);
       default:
         return read_atom(reader);
