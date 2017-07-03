@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 public class types {
 
 }
 
 interface MalType {
-
 }
 
 class MalList implements MalType {
@@ -181,12 +183,10 @@ class MalInt implements MalType {
   }
 }
 
+@Data
+@AllArgsConstructor
 class MalSymbol implements MalType {
   String value;
-
-  MalSymbol(String token) {
-    this.value = token;
-  }
 
   @Override
   public String toString() {
@@ -222,11 +222,15 @@ class MalNil implements MalType {
 
 }
 
-class MalTrue implements MalType {
+interface MalBool extends MalType {
 
 }
 
-class MalFalse implements MalType {
+class MalTrue implements MalBool {
+
+}
+
+class MalFalse implements MalBool {
 
 }
 
