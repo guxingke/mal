@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import mal.env.Env;
 
 public class types {
 
@@ -219,7 +221,10 @@ class MalDivSymbol extends MalSymbol {
 }
 
 class MalNil implements MalType {
-
+  @Override
+  public String toString() {
+    return "nil";
+  }
 }
 
 interface MalBool extends MalType {
@@ -227,11 +232,17 @@ interface MalBool extends MalType {
 }
 
 class MalTrue implements MalBool {
-
+  @Override
+  public String toString() {
+    return "true";
+  }
 }
 
 class MalFalse implements MalBool {
-
+  @Override
+  public String toString() {
+    return "false";
+  }
 }
 
 class MalString implements MalType {
@@ -245,4 +256,16 @@ class MalString implements MalType {
   public String toString() {
     return this.value;
   }
+}
+
+interface ILambda {
+  MalType apply(MalList args);
+}
+
+@AllArgsConstructor
+@NoArgsConstructor
+abstract class MalFun implements MalType, ILambda {
+  public MalType ast;
+  public Env env;
+  public MalList params;
 }

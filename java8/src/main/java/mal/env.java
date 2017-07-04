@@ -1,6 +1,7 @@
 package mal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 class env {
@@ -13,13 +14,22 @@ class env {
       this.outer = outer;
     }
 
+    Env(Env outer, MalList binds, MalList exprs) {
+      this.data = new HashMap<>();
+      this.outer = outer;
+
+      for (int i = 0; i < binds.size(); i++) {
+        this.data.put(((MalSymbol) binds.get(i)), exprs.get(i));
+      }
+    }
+
     MalType set(MalSymbol key, MalType value) {
       if (key == null || value == null) {
         throw new IllegalArgumentException();
       }
 
       data.put(key, value);
-      return this;
+      return value;
     }
 
     MalType find(MalSymbol key) {

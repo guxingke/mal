@@ -107,6 +107,12 @@ public class reader {
         return new MalDivSymbol();
       case "*":
         return new MalMultiSymbol();
+      case "true":
+        return new MalTrue();
+      case "false":
+        return new MalFalse();
+      case "nil":
+        return new MalNil();
     }
 
     // "a"
