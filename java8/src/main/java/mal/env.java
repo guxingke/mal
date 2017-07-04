@@ -37,7 +37,7 @@ class env {
     MalType get(MalSymbol key) {
       MalType env = this.find(key);
       if (env instanceof MalNil) {
-        throw new NotFoundException();
+        throw new NotFoundException("symbol not found");
       }
 
       Env realEnv = (Env) env;
@@ -47,5 +47,8 @@ class env {
   }
 
   static class NotFoundException extends RuntimeException {
+    NotFoundException(String msg) {
+      super(msg);
+    }
   }
 }
