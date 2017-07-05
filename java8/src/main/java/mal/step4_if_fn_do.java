@@ -41,8 +41,8 @@ public class step4_if_fn_do {
             }
             return EVAL(list.get(2), innerEnv);
           case "do":
-            // TODO
-            return new MalNil();
+            MalList malList = (MalList) eval_ast(ast.rest(), env);
+            return malList.get(malList.size() - 1);
           case "if":
             MalType bool = EVAL(list.get(1), env);
             if (!(bool instanceof MalBool)) {
@@ -69,12 +69,10 @@ public class step4_if_fn_do {
         }
       }
 
-      if (!(ast.get(0) instanceof MalIntFun)) {
+      if (!(ast.get(0) instanceof MalFun)) {
         return ast;
       }
-
-      MalIntFun fun = (MalIntFun) ast.get(0);
-      return fun.apply(((MalInt) ast.get(1)), ((MalInt) ast.get(2)));
+      return ((MalFun) ast.get(0)).apply(ast.rest());
     }
 
     return eval_ast(val, env);
@@ -99,7 +97,7 @@ public class step4_if_fn_do {
       return env.get(symbol);
     }
 
-    MalList rets = new MalLList();
+    MalList rets = new MalList();
     if (ast instanceof MalList) {
       MalList list = (MalList) ast;
 
@@ -138,6 +136,57 @@ public class step4_if_fn_do {
 
   public static void main(String[] args) throws Exception {
 
+    new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        return EVAL(ast, env);
+      }
+    };
+
+    MalFun add = new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        MalInt ret = (MalInt) args.get(0);
+        for (int i = 1; i < args.size(); i++) {
+          ret = MalInt.add(ret, ((MalInt) args.get(i)));
+        }
+        return ret;
+      }
+    };
+
+    MalFun sub = new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        MalInt ret = (MalInt) args.get(0);
+        for (int i = 1; i < args.size(); i++) {
+          ret = MalInt.sub(ret, ((MalInt) args.get(i)));
+        }
+        return ret;
+      }
+    };
+
+    MalFun multi = new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        MalInt ret = (MalInt) args.get(0);
+        for (int i = 1; i < args.size(); i++) {
+          ret = MalInt.multi(ret, ((MalInt) args.get(i)));
+        }
+        return ret;
+      }
+    };
+
+    MalFun div = new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        MalInt ret = (MalInt) args.get(0);
+        for (int i = 1; i < args.size(); i++) {
+          ret = MalInt.div(ret, ((MalInt) args.get(i)));
+        }
+        return ret;
+      }
+    };
+
     MalList binds = new MalList();
     binds.add(new MalAddSymbol());
     binds.add(new MalSubSymbol());
@@ -150,10 +199,10 @@ public class step4_if_fn_do {
     binds.add(new MalSymbol("fn*"));
 
     MalList exprs = new MalList();
-    exprs.add((MalIntFun) MalInt::add);
-    exprs.add((MalIntFun) MalInt::sub);
-    exprs.add((MalIntFun) MalInt::multi);
-    exprs.add((MalIntFun) MalInt::div);
+    exprs.add(add);
+    exprs.add(sub);
+    exprs.add(multi);
+    exprs.add(div);
     exprs.add(new MalSymbol("def!"));
     exprs.add(new MalSymbol("let*"));
     exprs.add(new MalSymbol("do"));
@@ -180,11 +229,6 @@ public class step4_if_fn_do {
         System.out.println(e.getMessage());
       }
     }
-  }
-
-  @FunctionalInterface
-  public interface MalIntFun extends MalType {
-    MalInt apply(MalInt left, MalInt right);
   }
 }
 

@@ -17,24 +17,41 @@ interface MalType {
 }
 
 class MalList implements MalType {
-  protected List<MalType> malTypeList;
-  protected String left = "(";
-  protected String right = ")";
+  List<MalType> malTypeList;
+  String left = "(";
+  String right = ")";
 
   MalList() {
     this.malTypeList = new ArrayList<>();
   }
 
-  public final int size() {
+  final int size() {
     return this.malTypeList.size();
   }
 
-  public MalType get(int index) {
+  MalType get(int index) {
     return this.malTypeList.get(index);
   }
 
-  protected void add(MalType malType) {
+  void add(MalType malType) {
     this.malTypeList.add(malType);
+  }
+
+  MalList rest() {
+    MalList ret = new MalLList();
+    switch (this.left) {
+      case "[":
+        ret = new MalMList();
+      case "{":
+        ret = new MalLList();
+    }
+
+    if (this.size() == 1) {
+      return ret;
+    }
+
+    ret.malTypeList = new ArrayList<>(malTypeList.subList(1, this.size()));
+    return ret;
   }
 
   @Override
@@ -258,6 +275,7 @@ class MalString implements MalType {
   }
 }
 
+@FunctionalInterface
 interface ILambda {
   MalType apply(MalList args);
 }
