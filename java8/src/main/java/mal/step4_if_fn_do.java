@@ -59,13 +59,15 @@ public class step4_if_fn_do {
 
             return new MalNil();
           case "fn*":
-            new MalFun() {
+            MalType f1 = ast.get(1);
+            MalType f2 = ast.get(2);
+            Env currentEnv = env;
+            return new MalFun() {
               @Override
               public MalType apply(MalList args) {
-                return EVAL(list.get(2), new Env(env, ((MalList) list.get(1)), args));
+                return EVAL(f2, new Env(currentEnv, ((MalList) f1), args));
               }
             };
-            return new MalNil();
         }
       }
 
@@ -118,6 +120,12 @@ public class step4_if_fn_do {
             rets.add(list.get(i));
           }
           if (Objects.equals(index0, new MalSymbol("let*"))) {
+            i++;
+            rets.add(list.get(i));
+            i++;
+            rets.add(list.get(i));
+          }
+          if (Objects.equals(index0, new MalSymbol("fn*"))) {
             i++;
             rets.add(list.get(i));
             i++;

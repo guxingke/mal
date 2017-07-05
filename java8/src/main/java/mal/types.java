@@ -286,4 +286,9 @@ abstract class MalFun implements MalType, ILambda {
   public MalType ast;
   public Env env;
   public MalList params;
+
+  @Override
+  public String toString() {
+    return "#<function>";
+  }
 }
