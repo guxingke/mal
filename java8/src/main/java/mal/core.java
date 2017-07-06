@@ -83,7 +83,7 @@ public class core {
       }
     });
 
-    ns.put(new MalSymbol("empty?"), new MalFun() {
+    ns.put(new MalSymbol("count"), new MalFun() {
       @Override
       public MalType apply(MalList args) {
         return args.get(0) instanceof MalList ? new MalInt(((MalList) args.get(0)).size()) : new MalInt(0);

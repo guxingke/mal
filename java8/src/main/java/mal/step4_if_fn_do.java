@@ -2,6 +2,8 @@ package mal;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import mal.env.Env;
@@ -163,6 +165,13 @@ public class step4_if_fn_do {
 
     Env env = new Env(null);
     core.ns.forEach(env::set);
+
+    List<String> coreCodes = new ArrayList<>();
+    coreCodes.add("(def! not (fn* [in] (if (= in false) true false)))");
+
+    for (String code : coreCodes) {
+      rep(code, env);
+    }
 
     while(true) {
       System.out.print("user> ");
