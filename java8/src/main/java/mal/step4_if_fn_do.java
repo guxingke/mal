@@ -2,9 +2,6 @@ package mal;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import mal.env.Env;
@@ -89,6 +86,10 @@ public class step4_if_fn_do {
   }
 
   static MalType eval_ast(MalType ast, Env env) {
+    if (ast instanceof MalSysSymbol) {
+      return ast;
+    }
+
     if (ast instanceof MalSymbol) {
       MalSymbol symbol = (MalSymbol) ast;
 
@@ -115,21 +116,37 @@ public class step4_if_fn_do {
         if (i == 0) {
           MalType index0 = EVAL(list.get(i), env);
           rets.add(index0);
-          if (Objects.equals(index0, new MalSymbol("def!"))) {
-            i++;
-            rets.add(list.get(i));
-          }
-          if (Objects.equals(index0, new MalSymbol("let*"))) {
-            i++;
-            rets.add(list.get(i));
-            i++;
-            rets.add(list.get(i));
-          }
-          if (Objects.equals(index0, new MalSymbol("fn*"))) {
-            i++;
-            rets.add(list.get(i));
-            i++;
-            rets.add(list.get(i));
+
+          if (index0 instanceof MalSymbol) {
+            String value = ((MalSymbol) index0).getValue();
+            switch (value) {
+              case "def!":
+                i++;
+                rets.add(list.get(i));
+                continue;
+              case "let*":
+                i++;
+                rets.add(list.get(i));
+                i++;
+                rets.add(list.get(i));
+                continue;
+              case "fn*":
+                i++;
+                rets.add(list.get(i));
+                i++;
+                rets.add(list.get(i));
+                continue;
+              case "do":
+                MalList rest = list.rest();
+                rets.append(rest);
+                i += rest.size();
+                continue;
+              case "if":
+                MalList ifRest = list.rest();
+                rets.append(ifRest);
+                i += ifRest.size();
+                continue;
+            }
           }
           continue;
         }
@@ -144,84 +161,8 @@ public class step4_if_fn_do {
 
   public static void main(String[] args) throws Exception {
 
-    new MalFun() {
-      @Override
-      public MalType apply(MalList args) {
-        return EVAL(ast, env);
-      }
-    };
-
-    MalFun add = new MalFun() {
-      @Override
-      public MalType apply(MalList args) {
-        MalInt ret = (MalInt) args.get(0);
-        for (int i = 1; i < args.size(); i++) {
-          ret = MalInt.add(ret, ((MalInt) args.get(i)));
-        }
-        return ret;
-      }
-    };
-
-    MalFun sub = new MalFun() {
-      @Override
-      public MalType apply(MalList args) {
-        MalInt ret = (MalInt) args.get(0);
-        for (int i = 1; i < args.size(); i++) {
-          ret = MalInt.sub(ret, ((MalInt) args.get(i)));
-        }
-        return ret;
-      }
-    };
-
-    MalFun multi = new MalFun() {
-      @Override
-      public MalType apply(MalList args) {
-        MalInt ret = (MalInt) args.get(0);
-        for (int i = 1; i < args.size(); i++) {
-          ret = MalInt.multi(ret, ((MalInt) args.get(i)));
-        }
-        return ret;
-      }
-    };
-
-    MalFun div = new MalFun() {
-      @Override
-      public MalType apply(MalList args) {
-        MalInt ret = (MalInt) args.get(0);
-        for (int i = 1; i < args.size(); i++) {
-          ret = MalInt.div(ret, ((MalInt) args.get(i)));
-        }
-        return ret;
-      }
-    };
-
-    MalList binds = new MalList();
-    binds.add(new MalAddSymbol());
-    binds.add(new MalSubSymbol());
-    binds.add(new MalMultiSymbol());
-    binds.add(new MalDivSymbol());
-    binds.add(new MalSymbol("def!"));
-    binds.add(new MalSymbol("let*"));
-    binds.add(new MalSymbol("do"));
-    binds.add(new MalSymbol("if"));
-    binds.add(new MalSymbol("fn*"));
-
-    MalList exprs = new MalList();
-    exprs.add(add);
-    exprs.add(sub);
-    exprs.add(multi);
-    exprs.add(div);
-    exprs.add(new MalSymbol("def!"));
-    exprs.add(new MalSymbol("let*"));
-    exprs.add(new MalSymbol("do"));
-    exprs.add(new MalSymbol("if"));
-    exprs.add(new MalSymbol("fn*"));
-
-    Env env = new Env(
-        null,
-        binds,
-        exprs
-    );
+    Env env = new Env(null);
+    core.ns.forEach(env::set);
 
     while(true) {
       System.out.print("user> ");

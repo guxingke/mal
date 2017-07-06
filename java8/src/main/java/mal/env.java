@@ -7,7 +7,7 @@ import java.util.Map;
 class env {
   static class Env implements MalType {
     Env outer;
-    Map<MalSymbol, MalType> data;
+    Map<String, MalType> data;
 
     Env(Env outer) {
       this.data = new HashMap<>();
@@ -19,7 +19,7 @@ class env {
       this.outer = outer;
 
       for (int i = 0; i < binds.size(); i++) {
-        this.data.put(((MalSymbol) binds.get(i)), exprs.get(i));
+        this.data.put(((MalSymbol) binds.get(i)).getValue(), exprs.get(i));
       }
     }
 
@@ -28,12 +28,12 @@ class env {
         throw new IllegalArgumentException();
       }
 
-      data.put(key, value);
+      data.put(key.getValue(), value);
       return value;
     }
 
     MalType find(MalSymbol key) {
-      if (data.containsKey(key)) {
+      if (data.containsKey(key.getValue())) {
         return this;
       }
 
@@ -52,7 +52,7 @@ class env {
 
       Env realEnv = (Env) env;
 
-      return realEnv.data.get(key);
+      return realEnv.data.get(key.getValue());
     }
   }
 

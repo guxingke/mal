@@ -2,10 +2,12 @@ package mal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import mal.env.Env;
 
@@ -38,7 +40,7 @@ class MalList implements MalType {
   }
 
   MalList rest() {
-    MalList ret = new MalLList();
+    MalList ret = new MalList();
     switch (this.left) {
       case "[":
         ret = new MalMList();
@@ -54,11 +56,36 @@ class MalList implements MalType {
     return ret;
   }
 
+  MalList append(MalList another) {
+    this.malTypeList.addAll(another.malTypeList);
+    return this;
+  }
+
   @Override
   public String toString() {
     return malTypeList.stream()
         .map(MalType::toString)
         .collect(Collectors.joining(" ", this.left, this.right));
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalList)) {
+      return false;
+    }
+
+    MalList target = (MalList) obj;
+
+    if (target.size() != this.size()) {
+      return false;
+    }
+
+    for (int i = 0; i < target.size(); i++) {
+      if (!Objects.equals(target.get(i), this.get(i))) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
@@ -139,7 +166,6 @@ class MalWithMeta implements MalType {
   }
 }
 
-
 class MalQuasiQuote implements MalType {
   private String key;
   private MalType mal;
@@ -173,6 +199,7 @@ class MalLList extends MalList {
   }
 }
 
+@Getter
 class MalInt implements MalType {
   Integer value;
 
@@ -196,9 +223,34 @@ class MalInt implements MalType {
     return new MalInt(a.value / b.value);
   }
 
+  public static MalBool lt(MalInt a, MalInt b) {
+    return sub(a, b).getValue() < 0 ? new MalTrue() : new MalFalse();
+  }
+
+  public static MalBool lte(MalInt a, MalInt b) {
+    return sub(a, b).getValue() <= 0 ? new MalTrue() : new MalFalse();
+  }
+
+  public static MalBool gt(MalInt a, MalInt b) {
+    return sub(a, b).getValue() > 0 ? new MalTrue() : new MalFalse();
+  }
+
+  public static MalBool gte(MalInt a, MalInt b) {
+    return sub(a, b).getValue() >= 0 ? new MalTrue() : new MalFalse();
+  }
+
   @Override
   public String toString() {
     return value.toString();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalInt)) {
+      return false;
+    }
+
+    return Objects.equals(((MalInt) obj).getValue(), this.getValue());
   }
 }
 
@@ -210,6 +262,20 @@ class MalSymbol implements MalType {
   @Override
   public String toString() {
     return this.value;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalSymbol)) {
+      return false;
+    }
+    return ((MalSymbol) obj).getValue().equals(this.getValue());
+  }
+}
+
+class MalSysSymbol extends MalSymbol {
+  MalSysSymbol(String value) {
+    super(value);
   }
 }
 
@@ -244,18 +310,34 @@ class MalNil implements MalType {
   }
 }
 
-interface MalBool extends MalType {
+abstract class MalBool implements MalType {
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalBool)) {
+      return false;
+    }
 
+    if (this instanceof MalTrue && obj instanceof MalTrue) {
+      return true;
+    }
+
+    if (this instanceof MalFalse && obj instanceof MalFalse) {
+      return true;
+    }
+
+    return false;
+  }
 }
 
-class MalTrue implements MalBool {
+class MalTrue extends MalBool {
+
   @Override
   public String toString() {
     return "true";
   }
 }
 
-class MalFalse implements MalBool {
+class MalFalse extends MalBool {
   @Override
   public String toString() {
     return "false";
@@ -272,6 +354,15 @@ class MalString implements MalType {
   @Override
   public String toString() {
     return this.value;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalString)) {
+      return false;
+    }
+
+    return ((MalString) obj).value.equals(this.value);
   }
 }
 
