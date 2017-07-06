@@ -57,7 +57,19 @@ public class core {
     ns.put(new MalSymbol("prn"), new MalFun() {
       @Override
       public MalType apply(MalList args) {
-        System.out.println(args.get(0));
+        if (args.size() == 0) {
+          System.out.println();
+          return new MalNil();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < args.size(); i++) {
+          sb.append(printer.pr_str(args.get(i)));
+          if (i != args.size() - 1) {
+            sb.append(" ");
+          }
+        }
+        System.out.println(sb.toString());
         return new MalNil();
       }
     });

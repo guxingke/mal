@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import mal.env.Env;
 
@@ -43,20 +42,22 @@ public class step4_if_fn_do {
             MalList malList = (MalList) eval_ast(ast.rest(), env);
             return malList.get(malList.size() - 1);
           case "if":
+            MalBool ret;
             MalType bool = EVAL(list.get(1), env);
-            if (!(bool instanceof MalBool)) {
-              throw new reader.EOFException("un expect op");
+            if (bool instanceof MalNil
+                || bool instanceof MalFalse) {
+              ret = new MalFalse();
+            } else {
+              ret = new MalTrue();
             }
 
-            if (bool instanceof MalTrue) {
+            if (ret instanceof MalTrue) {
               return EVAL(list.get(2), env);
             }
 
-            if (bool instanceof MalFalse) {
+            if (ret instanceof MalFalse) {
               return EVAL(list.get(3), env);
             }
-
-            return new MalNil();
           case "fn*":
             MalType f1 = ast.get(1);
             MalType f2 = ast.get(2);
@@ -167,7 +168,7 @@ public class step4_if_fn_do {
     core.ns.forEach(env::set);
 
     List<String> coreCodes = new ArrayList<>();
-    coreCodes.add("(def! not (fn* [in] (if (= in false) true false)))");
+    coreCodes.add("(def! not (fn* (a) (if a false true)))");
 
     for (String code : coreCodes) {
       rep(code, env);
@@ -183,8 +184,12 @@ public class step4_if_fn_do {
 
       try {
         System.out.println(rep(line, env));
-      } catch (Exception e) {
+      } catch (mal.env.NotFoundException e) {
         System.out.println(e.getMessage());
+      } catch (reader.EOFException e) {
+        System.out.println(e.msg);
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }
   }

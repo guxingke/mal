@@ -1,5 +1,6 @@
 package mal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +19,22 @@ class env {
       this.data = new HashMap<>();
       this.outer = outer;
 
+
       for (int i = 0; i < binds.size(); i++) {
-        this.data.put(((MalSymbol) binds.get(i)).getValue(), exprs.get(i));
+
+        String token = ((MalSymbol) binds.get(i)).getValue();
+        if (token.equals("&")) {
+          MalSymbol key = (MalSymbol) binds.get(i + 1);
+
+          if (exprs.size() < i) {
+            break;
+          }
+          List<MalType> malTypes = new ArrayList<>(exprs.malTypeList.subList(i, exprs.malTypeList.size()));
+          MalList value = new MalList(malTypes);
+          this.data.put(key.getValue(), value);
+          break;
+        }
+        this.data.put(token, exprs.get(i));
       }
     }
 

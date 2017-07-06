@@ -1,5 +1,7 @@
 package mal;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,11 +29,21 @@ class MalList implements MalType {
     this.malTypeList = new ArrayList<>();
   }
 
+  MalList(List<MalType> malTypes) {
+    this.malTypeList = malTypes;
+    if (malTypeList == null) {
+      this.malTypeList = new ArrayList<>();
+    }
+  }
+
   final int size() {
     return this.malTypeList.size();
   }
 
   MalType get(int index) {
+    if (this.malTypeList.size() < index + 1) {
+      return new MalNil();
+    }
     return this.malTypeList.get(index);
   }
 
@@ -117,6 +129,7 @@ class MalUnQuote implements MalType {
   public String toString() {
     return "(" + key + " " + mal.toString() + ")";
   }
+
 }
 
 class MalDeref implements MalType {
@@ -164,6 +177,7 @@ class MalWithMeta implements MalType {
   public String toString() {
     return "(" + key + " " + mal.toString() + " " + meta.toString() + ")";
   }
+
 }
 
 class MalQuasiQuote implements MalType {
@@ -308,6 +322,11 @@ class MalNil implements MalType {
   public String toString() {
     return "nil";
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof MalNil;
+  }
 }
 
 abstract class MalBool implements MalType {
@@ -338,6 +357,7 @@ class MalTrue extends MalBool {
 }
 
 class MalFalse extends MalBool {
+
   @Override
   public String toString() {
     return "false";
@@ -364,6 +384,7 @@ class MalString implements MalType {
 
     return ((MalString) obj).value.equals(this.value);
   }
+
 }
 
 @FunctionalInterface
