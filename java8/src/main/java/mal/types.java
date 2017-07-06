@@ -1,11 +1,17 @@
 package mal;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import mal.env.Env;
 
 public class types {
 
@@ -15,24 +21,56 @@ interface MalType {
 }
 
 class MalList implements MalType {
-  protected List<MalType> malTypeList;
-  protected String left = "(";
-  protected String right = ")";
+  List<MalType> malTypeList;
+  String left = "(";
+  String right = ")";
 
   MalList() {
     this.malTypeList = new ArrayList<>();
   }
 
-  public final int size() {
+  MalList(List<MalType> malTypes) {
+    this.malTypeList = malTypes;
+    if (malTypeList == null) {
+      this.malTypeList = new ArrayList<>();
+    }
+  }
+
+  final int size() {
     return this.malTypeList.size();
   }
 
-  public MalType get(int index) {
+  MalType get(int index) {
+    if (this.malTypeList.size() < index + 1) {
+      return new MalNil();
+    }
     return this.malTypeList.get(index);
   }
 
-  protected void add(MalType malType) {
+  void add(MalType malType) {
     this.malTypeList.add(malType);
+  }
+
+  MalList rest() {
+    MalList ret = new MalList();
+    switch (this.left) {
+      case "[":
+        ret = new MalMList();
+      case "{":
+        ret = new MalLList();
+    }
+
+    if (this.size() == 1) {
+      return ret;
+    }
+
+    ret.malTypeList = new ArrayList<>(malTypeList.subList(1, this.size()));
+    return ret;
+  }
+
+  MalList append(MalList another) {
+    this.malTypeList.addAll(another.malTypeList);
+    return this;
   }
 
   @Override
@@ -40,6 +78,26 @@ class MalList implements MalType {
     return malTypeList.stream()
         .map(MalType::toString)
         .collect(Collectors.joining(" ", this.left, this.right));
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalList)) {
+      return false;
+    }
+
+    MalList target = (MalList) obj;
+
+    if (target.size() != this.size()) {
+      return false;
+    }
+
+    for (int i = 0; i < target.size(); i++) {
+      if (!Objects.equals(target.get(i), this.get(i))) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
@@ -71,6 +129,7 @@ class MalUnQuote implements MalType {
   public String toString() {
     return "(" + key + " " + mal.toString() + ")";
   }
+
 }
 
 class MalDeref implements MalType {
@@ -118,8 +177,8 @@ class MalWithMeta implements MalType {
   public String toString() {
     return "(" + key + " " + mal.toString() + " " + meta.toString() + ")";
   }
-}
 
+}
 
 class MalQuasiQuote implements MalType {
   private String key;
@@ -154,6 +213,7 @@ class MalLList extends MalList {
   }
 }
 
+@Getter
 class MalInt implements MalType {
   Integer value;
 
@@ -177,9 +237,34 @@ class MalInt implements MalType {
     return new MalInt(a.value / b.value);
   }
 
+  public static MalBool lt(MalInt a, MalInt b) {
+    return sub(a, b).getValue() < 0 ? new MalTrue() : new MalFalse();
+  }
+
+  public static MalBool lte(MalInt a, MalInt b) {
+    return sub(a, b).getValue() <= 0 ? new MalTrue() : new MalFalse();
+  }
+
+  public static MalBool gt(MalInt a, MalInt b) {
+    return sub(a, b).getValue() > 0 ? new MalTrue() : new MalFalse();
+  }
+
+  public static MalBool gte(MalInt a, MalInt b) {
+    return sub(a, b).getValue() >= 0 ? new MalTrue() : new MalFalse();
+  }
+
   @Override
   public String toString() {
     return value.toString();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalInt)) {
+      return false;
+    }
+
+    return Objects.equals(((MalInt) obj).getValue(), this.getValue());
   }
 }
 
@@ -191,6 +276,20 @@ class MalSymbol implements MalType {
   @Override
   public String toString() {
     return this.value;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalSymbol)) {
+      return false;
+    }
+    return ((MalSymbol) obj).getValue().equals(this.getValue());
+  }
+}
+
+class MalSysSymbol extends MalSymbol {
+  MalSysSymbol(String value) {
+    super(value);
   }
 }
 
@@ -219,19 +318,50 @@ class MalDivSymbol extends MalSymbol {
 }
 
 class MalNil implements MalType {
+  @Override
+  public String toString() {
+    return "nil";
+  }
 
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof MalNil;
+  }
 }
 
-interface MalBool extends MalType {
+abstract class MalBool implements MalType {
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalBool)) {
+      return false;
+    }
 
+    if (this instanceof MalTrue && obj instanceof MalTrue) {
+      return true;
+    }
+
+    if (this instanceof MalFalse && obj instanceof MalFalse) {
+      return true;
+    }
+
+    return false;
+  }
 }
 
-class MalTrue implements MalBool {
+class MalTrue extends MalBool {
 
+  @Override
+  public String toString() {
+    return "true";
+  }
 }
 
-class MalFalse implements MalBool {
+class MalFalse extends MalBool {
 
+  @Override
+  public String toString() {
+    return "false";
+  }
 }
 
 class MalString implements MalType {
@@ -244,5 +374,33 @@ class MalString implements MalType {
   @Override
   public String toString() {
     return this.value;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof MalString)) {
+      return false;
+    }
+
+    return ((MalString) obj).value.equals(this.value);
+  }
+
+}
+
+@FunctionalInterface
+interface ILambda {
+  MalType apply(MalList args);
+}
+
+@AllArgsConstructor
+@NoArgsConstructor
+abstract class MalFun implements MalType, ILambda {
+  public MalType ast;
+  public Env env;
+  public MalList params;
+
+  @Override
+  public String toString() {
+    return "#<function>";
   }
 }
