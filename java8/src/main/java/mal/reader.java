@@ -113,12 +113,6 @@ public class reader {
         return new MalFalse();
       case "nil":
         return new MalNil();
-      case "let*":
-      case "def!":
-      case "do":
-      case "if":
-      case "fn*":
-        return new MalSysSymbol(token);
     }
 
     // "a"

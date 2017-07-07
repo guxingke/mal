@@ -401,6 +401,9 @@ abstract class MalFun implements MalType, ILambda {
 
   @Override
   public String toString() {
-    return "#<function>";
+    if (ast == null || ast instanceof MalNil) {
+      return "#<function>";
+    }
+    return "#<function> " + ast.toString();
   }
 }

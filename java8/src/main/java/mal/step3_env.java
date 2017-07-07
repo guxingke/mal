@@ -13,48 +13,48 @@ public class step3_env {
   }
 
   static MalType EVAL(MalType val, Env env) {
-    if (val instanceof MalList) {
-      MalList list = (MalList) val;
-      if (list.size() == 0) {
-        return val;
-      }
-
-      MalList ast = ((MalList) eval_ast(val, env));
-      if (ast.get(0) instanceof MalSymbol) {
-        if (((MalSymbol) ast.get(0)).getValue().equals("def!")) {
-          MalType eval = EVAL(ast.get(2), env);
-          env.set(((MalSymbol) ast.get(1)), eval);
-          return eval;
-        }
-
-        if (Objects.equals(ast.get(0), new MalSymbol("let*"))) {
-          Env innerEnv = new Env(env);
-          MalType binding = list.get(1);
-          if (!(binding instanceof MalList)) {
-            throw new reader.EOFException("let* should be follow a list");
-          }
-          MalList bindingList = (MalList) binding;
-
-          for (int j = 0; j <= bindingList.size() / 2; j = j + 2) {
-            innerEnv.set(((MalSymbol) bindingList.get(j)), EVAL(bindingList.get(j + 1), innerEnv));
-          }
-
-          MalType ret = EVAL(list.get(2), innerEnv);
-          return ret;
-        }
-      }
-
-      if (!(ast.get(0) instanceof MalIntFun)) {
-        return ast;
-      }
-
-      MalIntFun fun = (MalIntFun) ast.get(0);
-      return fun.apply(((MalInt) ast.get(1)), ((MalInt) ast.get(2)));
+    if (!(val instanceof MalList)) {
+      return eval_ast(val, env);
     }
 
-    return eval_ast(val, env);
+    MalList list = (MalList) val;
+    if (list.size() == 0) {
+      return val;
+    }
+
+    if (list.get(0) instanceof MalSymbol) {
+      if (((MalSymbol) list.get(0)).getValue().equals("def!")) {
+        MalType eval = EVAL(list.get(2), env);
+        env.set(((MalSymbol) list.get(1)), eval);
+        return eval;
+      }
+
+      if (Objects.equals(list.get(0), new MalSymbol("let*"))) {
+        Env innerEnv = new Env(env);
+        MalType binding = list.get(1);
+        if (!(binding instanceof MalList)) {
+          throw new reader.EOFException("let* should be follow a list");
+        }
+        MalList bindingList = (MalList) binding;
+
+        for (int j = 0; j <= bindingList.size() / 2; j = j + 2) {
+          innerEnv.set(((MalSymbol) bindingList.get(j)), EVAL(bindingList.get(j + 1), innerEnv));
+        }
+
+        MalType ret = EVAL(list.get(2), innerEnv);
+        return ret;
+      }
+    }
+
+    MalList ast = ((MalList) eval_ast(val, env));
+    if (!(ast.get(0) instanceof MalIntFun)) {
+      return ast;
+    }
+
+    MalIntFun fun = (MalIntFun) ast.get(0);
+    return fun.apply(((MalInt) ast.get(1)), ((MalInt) ast.get(2)));
   }
-  
+
   static String PRINT(MalType val) {
     return printer.pr_str(val);
   }
@@ -86,22 +86,7 @@ public class step3_env {
         rets = new MalLList();
       }
 
-      for (int i=0; i< list.size(); i++) {
-        if (i == 0) {
-          MalType index0 = EVAL(list.get(i), env);
-          rets.add(index0);
-          if (Objects.equals(index0, new MalSymbol("def!"))) {
-            i++;
-            rets.add(list.get(i));
-          }
-          if (Objects.equals(index0, new MalSymbol("let*"))) {
-            i++;
-            rets.add(list.get(i));
-            i++;
-            rets.add(list.get(i));
-          }
-          continue;
-        }
+      for (int i = 0; i < list.size(); i++) {
         rets.add(EVAL(list.get(i), env));
       }
 
@@ -118,13 +103,11 @@ public class step3_env {
     env.set(new MalSubSymbol(), (MalIntFun) MalInt::sub);
     env.set(new MalMultiSymbol(), (MalIntFun) MalInt::multi);
     env.set(new MalDivSymbol(), (MalIntFun) MalInt::div);
-    env.set(new MalSymbol("def!"), new MalSymbol("def!"));
-    env.set(new MalSymbol("let*"), new MalSymbol("let*"));
 
-    while(true) {
+    while (true) {
       System.out.print("user> ");
-      BufferedReader buffer=new BufferedReader(new InputStreamReader(System.in));
-      String line=buffer.readLine();
+      BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
+      String line = buffer.readLine();
       if (line == null) {
         break;
       }

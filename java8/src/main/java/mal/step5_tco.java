@@ -7,79 +7,85 @@ import java.util.List;
 
 import mal.env.Env;
 
-public class step4_if_fn_do {
+public class step5_tco {
 
   static MalType READ(String val) {
     return reader.read_str(val);
   }
 
   static MalType EVAL(MalType val, Env env) {
-    if (!(val instanceof MalList)) {
-      return eval_ast(val, env);
-    }
+    while (true) {
+      if (!(val instanceof MalList)) {
+        return eval_ast(val, env);
+      }
 
-    MalList list = (MalList) val;
-    if (list.size() == 0) {
-      return val;
-    }
+      MalList ast = (MalList) val;
+      if (ast.size() == 0) {
+        return val;
+      }
 
-    if (list.get(0) instanceof MalSymbol) {
-      MalSymbol symbol = (MalSymbol) list.get(0);
-      switch (symbol.getValue()) {
+      String token = "_FN_";
+      if (ast.get(0) instanceof MalSymbol) {
+        token = ((MalSymbol) ast.get(0)).getValue();
+      }
+
+      switch (token) {
         case "def!":
-          return env.set(((MalSymbol) list.get(1)), EVAL(list.get(2), env));
+          return env.set(((MalSymbol) ast.get(1)), EVAL(ast.get(2), env));
         case "let*":
           Env innerEnv = new Env(env);
-          MalType binding = list.get(1);
+          MalType binding = ast.get(1);
           if (!(binding instanceof MalList)) {
-            throw new reader.EOFException("let* should be follow a list");
+            throw new reader.EOFException("let* should be follow a ast");
           }
           MalList bindingList = (MalList) binding;
 
           for (int j = 0; j <= bindingList.size() / 2; j = j + 2) {
             innerEnv.set(((MalSymbol) bindingList.get(j)), EVAL(bindingList.get(j + 1), innerEnv));
           }
-          return EVAL(list.get(2), innerEnv);
+          val = ast.get(2);
+          env = innerEnv;
+          break;
         case "do":
-          MalList malList = (MalList) eval_ast(list.rest(), env);
-          return malList.get(malList.size() - 1);
+          MalList rest = ast.rest();
+          eval_ast(new MalList(new ArrayList<>(rest.malTypeList.subList(0, rest.size() - 1))), env);
+          val = rest.get(rest.size() - 1);
+          break;
         case "if":
-          MalBool ret;
-          MalType bool = EVAL(list.get(1), env);
+          MalType bool = EVAL(ast.get(1), env);
           if (bool instanceof MalNil
               || bool instanceof MalFalse) {
-            ret = new MalFalse();
+            val = ast.get(3);
           } else {
-            ret = new MalTrue();
+            val = ast.get(2);
           }
-
-          if (ret instanceof MalTrue) {
-            return EVAL(list.get(2), env);
-          }
-
-          if (ret instanceof MalFalse) {
-            return EVAL(list.get(3), env);
-          }
+          break;
         case "fn*":
-          MalType f1 = list.get(1);
-          MalType f2 = list.get(2);
-          Env currentEnv = env;
-          return new MalFun() {
+          final MalList f1 = ((MalList) ast.get(1));
+          final MalType f2 = ast.get(2);
+          final Env currentEnv = env;
+          return new MalFun(f2, env, f1) {
             @Override
             public MalType apply(MalList args) {
-              return EVAL(f2, new Env(currentEnv, ((MalList) f1), args));
+              return EVAL(f2, new Env(currentEnv, f1, args));
             }
           };
+        default:
+          MalList el= ((MalList) eval_ast(val, env));
+          if (!(el.get(0) instanceof MalFun)) {
+            System.out.println("UN EXPECT RETURN");
+            return el;
+          }
+
+          MalFun fun = (MalFun) el.get(0);
+          if (fun.ast == null || fun.ast instanceof MalNil) {
+            return fun.apply(el.rest());
+          }
+          val = fun.ast;
+          env = new Env(env, fun.params, el.rest());
       }
     }
-
-    MalList ast = ((MalList) eval_ast(val, env));
-    if (!(ast.get(0) instanceof MalFun)) {
-      return ast;
-    }
-    return ((MalFun) ast.get(0)).apply(ast.rest());
   }
-
 
   static String PRINT(MalType val) {
     return printer.pr_str(val);
@@ -94,25 +100,20 @@ public class step4_if_fn_do {
       return env.get((MalSymbol)ast);
     }
 
-    MalList rets = new MalList();
     if (ast instanceof MalList) {
+      MalList rets = new MalList();
       MalList list = (MalList) ast;
-
       if ("[".equals(list.left)) {
         rets = new MalMList();
       }
-
       if ("{".equals(list.left)) {
         rets = new MalLList();
       }
-
       for (int i = 0; i < list.size(); i++) {
         rets.add(EVAL(list.get(i), env));
       }
-
       return rets;
     }
-
     return ast;
   }
 
@@ -123,6 +124,7 @@ public class step4_if_fn_do {
 
     List<String> coreCodes = new ArrayList<>();
     coreCodes.add("(def! not (fn* (a) (if a false true)))");
+    coreCodes.add("(def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))");
 
     for (String code : coreCodes) {
       rep(code, env);
