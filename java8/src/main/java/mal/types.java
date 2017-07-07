@@ -404,7 +404,6 @@ abstract class MalFun implements MalType, ILambda {
     if (ast == null || ast instanceof MalNil) {
       return "#<function>";
     }
-
     return "#<function> " + ast.toString();
   }
 }

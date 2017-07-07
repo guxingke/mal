@@ -80,6 +80,7 @@ public class step4_if_fn_do {
     return ((MalFun) ast.get(0)).apply(ast.rest());
   }
 
+
   static String PRINT(MalType val) {
     return printer.pr_str(val);
   }
