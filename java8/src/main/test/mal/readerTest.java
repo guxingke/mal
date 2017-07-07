@@ -6,10 +6,6 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-/**
- * @author gxk
- * @since 2017/6/28 обнГ7:12
- */
 public class readerTest {
   @Test
   public void read_str() throws Exception {
