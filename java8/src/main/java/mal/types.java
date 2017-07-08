@@ -387,6 +387,17 @@ class MalString implements MalType {
 
 }
 
+@Data
+@AllArgsConstructor
+class MalAtom implements MalType {
+  MalType value;
+
+  @Override
+  public String toString() {
+    return "(atom " + value.toString() + ")";
+  }
+}
+
 @FunctionalInterface
 interface ILambda {
   MalType apply(MalList args);

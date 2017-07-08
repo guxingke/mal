@@ -1,7 +1,10 @@
 package mal;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 /**
  * @author gxk
@@ -71,6 +74,24 @@ public class core {
         }
         System.out.println(sb.toString());
         return new MalNil();
+      }
+    });
+
+    ns.put(new MalSymbol("str"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        if (args.size() == 0) {
+          return new MalNil();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < args.size(); i++) {
+          sb.append(printer.pr_str(args.get(i)));
+          if (i != args.size() - 1) {
+            sb.append(" ");
+          }
+        }
+        return new MalString(sb.toString());
       }
     });
 
@@ -150,6 +171,66 @@ public class core {
           ret = and(ret, MalInt.gte(((MalInt) args.get(i)), ((MalInt) args.get(i + 1))));
         }
         return ret;
+      }
+    });
+
+    ns.put(new MalSymbol("read-string"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        return reader.read_str(((MalString) args.get(0)).value);
+      }
+    });
+
+    ns.put(new MalSymbol("slurp"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        String name = ((MalString) args.get(0)).value;
+        try {
+          return new MalString(new Scanner(new File(name)).useDelimiter("\\Z").next() + "\n");
+        } catch (FileNotFoundException e) {
+          throw new RuntimeException(e.getMessage());
+        }
+      }
+    });
+
+    ns.put(new MalSymbol("atom"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        return new MalAtom(args.get(0));
+      }
+    });
+
+    ns.put(new MalSymbol("atom?"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        return args.get(0) instanceof MalAtom ? new MalTrue() : new MalFalse();
+      }
+    });
+
+    ns.put(new MalSymbol("deref"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        return ((MalAtom) args.get(0)).value;
+      }
+    });
+
+    ns.put(new MalSymbol("reset!"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        return ((MalAtom) args.get(0)).value = args.get(1);
+      }
+    });
+
+    ns.put(new MalSymbol("swap!"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        MalAtom atm = (MalAtom) args.get(0);
+        MalFun f = (MalFun) args.get(1);
+        MalList rest = args.rest().rest();
+        rest.malTypeList.add(0, atm.getValue());
+
+        atm.value = f.apply(rest);
+        return atm.value;
       }
     });
   }

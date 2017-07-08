@@ -117,7 +117,7 @@ public class reader {
 
     // "a"
     if (token.startsWith("\"")) {
-      return new MalString(token);
+      return new MalString(token.substring(1, token.length() - 1));
     }
     // ":a" , mal string for temporary
     if (token.startsWith(":")) {
