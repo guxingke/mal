@@ -1,9 +1,9 @@
 package mal;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -55,9 +55,7 @@ class MalList implements MalType {
     MalList ret = new MalList();
     switch (this.left) {
       case "[":
-        ret = new MalMList();
-      case "{":
-        ret = new MalLList();
+        ret = new MalVector();
     }
 
     if (this.size() == 1) {
@@ -132,19 +130,20 @@ class MalUnQuote implements MalType {
 
 }
 
-class MalDeref implements MalType {
-  private String key;
-  private MalType mal;
+class MalDeref extends MalList {
 
   MalDeref(MalType type) {
-    this.mal = type;
-    key = "deref";
+    super();
+    this.left = "(deref";
+    this.right = ")";
+    this.malTypeList.add(new MalSymbol("deref"));
+    if (type instanceof MalList) {
+      this.malTypeList.addAll(((MalList) type).malTypeList);
+    } else {
+      this.malTypeList.add(type);
+    }
   }
 
-  @Override
-  public String toString() {
-    return "(" + key + " " + mal.toString() + ")";
-  }
 }
 
 class MalSpliceUnquote implements MalType {
@@ -195,21 +194,44 @@ class MalQuasiQuote implements MalType {
   }
 }
 
-class MalMList extends MalList {
+class MalVector extends MalList {
 
-  MalMList() {
+  MalVector() {
     this.malTypeList = new ArrayList<>();
     this.left = "[";
     this.right = "]";
   }
 }
 
-class MalLList extends MalList {
+class MalHashMap implements MalType {
+  MalList list;
+  Map<String, MalType> map = new HashMap<>();
 
-  MalLList() {
-    this.malTypeList = new ArrayList<>();
-    this.left = "{";
-    this.right = "}";
+  MalHashMap(MalList list) {
+    list.left = "{";
+    list.right = "}";
+    this.list = list;
+
+    for (int i = 0; i < list.size()/2; i++) {
+      map.put(((MalString) list.get(i)).value, list.get(i + 1));
+    }
+  }
+
+  @Override
+  public String toString() {
+    return this.list.toString();
+  }
+
+  public int size() {
+    return map.size();
+  }
+
+  public MalType get(MalSymbol key) {
+    if (!map.containsKey(key.getValue())) {
+      throw new env.NotFoundException("hash-map not contains this key, " + key.getValue());
+    }
+
+    return map.get(key.getValue());
   }
 }
 
@@ -284,12 +306,6 @@ class MalSymbol implements MalType {
       return false;
     }
     return ((MalSymbol) obj).getValue().equals(this.getValue());
-  }
-}
-
-class MalSysSymbol extends MalSymbol {
-  MalSysSymbol(String value) {
-    super(value);
   }
 }
 

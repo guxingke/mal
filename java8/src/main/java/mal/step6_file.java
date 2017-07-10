@@ -3,7 +3,9 @@ package mal;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import mal.env.Env;
 
@@ -15,7 +17,7 @@ public class step6_file {
 
   static MalType EVAL(MalType val, Env env) {
     while (true) {
-      if (!(val instanceof MalList)) {
+      if (!((val instanceof MalList))) {
         return eval_ast(val, env);
       }
 
@@ -104,15 +106,24 @@ public class step6_file {
       MalList rets = new MalList();
       MalList list = (MalList) ast;
       if ("[".equals(list.left)) {
-        rets = new MalMList();
-      }
-      if ("{".equals(list.left)) {
-        rets = new MalLList();
+        rets = new MalVector();
       }
       for (int i = 0; i < list.size(); i++) {
         rets.add(EVAL(list.get(i), env));
       }
       return rets;
+    }
+
+    if (ast instanceof MalHashMap) {
+      MalList innerList = ((MalHashMap) ast).list;
+      Map<String, MalType> newMap = new HashMap<>();
+      for (int i = 0; i < innerList.size()/2; i++) {
+        newMap.put(
+            ((MalString) innerList.get(i)).value,
+            EVAL(innerList.get(i + 1), env)
+        );
+      }
+      ((MalHashMap) ast).map = newMap;
     }
     return ast;
   }

@@ -104,10 +104,7 @@ public class step5_tco {
       MalList rets = new MalList();
       MalList list = (MalList) ast;
       if ("[".equals(list.left)) {
-        rets = new MalMList();
-      }
-      if ("{".equals(list.left)) {
-        rets = new MalLList();
+        rets = new MalVector();
       }
       for (int i = 0; i < list.size(); i++) {
         rets.add(EVAL(list.get(i), env));
