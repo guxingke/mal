@@ -74,16 +74,12 @@ public class step3_env {
       return env.get(symbol);
     }
 
-    MalList rets = new MalLList();
+    MalList rets = new MalList();
     if (ast instanceof MalList) {
       MalList list = (MalList) ast;
 
       if ("[".equals(list.left)) {
-        rets = new MalMList();
-      }
-
-      if ("{".equals(list.left)) {
-        rets = new MalLList();
+        rets = new MalVector();
       }
 
       for (int i = 0; i < list.size(); i++) {

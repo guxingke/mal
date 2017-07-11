@@ -36,8 +36,9 @@ public class reader {
     switch (token) {
       case "(":
       case "[":
-      case "{":
         return read_list(reader);
+      case "{":
+        return read_map(reader);
       case "'":
         reader.next();
         return new MalQuote(read_form(reader));
@@ -62,15 +63,21 @@ public class reader {
     }
   }
 
+  private static MalHashMap read_map(Reader reader) {
+    MalList malList = read_list(reader);
+    return new MalHashMap(malList);
+  }
+
   static MalList read_list(Reader reader) {
     MalList malList = new MalList();
     String token = reader.next();
     if ("[".equals(token)) {
-      malList = new MalMList();
+      malList = new MalVector();
     }
 
     if ("{".equals(token)) {
-      malList = new MalLList();
+      malList.left = "{";
+      malList.right = "}";
     }
 
     while (!reader.peek().equals(malList.right)) {
@@ -117,7 +124,7 @@ public class reader {
 
     // "a"
     if (token.startsWith("\"")) {
-      return new MalString(token);
+      return new MalString(token.substring(1, token.length() - 1));
     }
     // ":a" , mal string for temporary
     if (token.startsWith(":")) {

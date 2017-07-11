@@ -3,11 +3,13 @@ package mal;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import mal.env.Env;
 
-public class step5_tco {
+public class step6_file {
 
   static MalType READ(String val) {
     return reader.read_str(val);
@@ -15,7 +17,7 @@ public class step5_tco {
 
   static MalType EVAL(MalType val, Env env) {
     while (true) {
-      if (!(val instanceof MalList)) {
+      if (!((val instanceof MalList))) {
         return eval_ast(val, env);
       }
 
@@ -111,6 +113,18 @@ public class step5_tco {
       }
       return rets;
     }
+
+    if (ast instanceof MalHashMap) {
+      MalList innerList = ((MalHashMap) ast).list;
+      Map<String, MalType> newMap = new HashMap<>();
+      for (int i = 0; i < innerList.size()/2; i++) {
+        newMap.put(
+            ((MalString) innerList.get(i)).value,
+            EVAL(innerList.get(i + 1), env)
+        );
+      }
+      ((MalHashMap) ast).map = newMap;
+    }
     return ast;
   }
 
@@ -119,9 +133,19 @@ public class step5_tco {
     Env env = new Env(null);
     core.ns.forEach(env::set);
 
+    // set eval
+    final Env evalEnv = env;
+    env.set(new MalSymbol("eval"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        return EVAL(args.get(0), evalEnv);
+      }
+    });
+
     List<String> coreCodes = new ArrayList<>();
     coreCodes.add("(def! not (fn* (a) (if a false true)))");
     coreCodes.add("(def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))");
+    coreCodes.add("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\" )))))");
 
     for (String code : coreCodes) {
       rep(code, env);

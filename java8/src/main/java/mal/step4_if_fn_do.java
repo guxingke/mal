@@ -99,11 +99,7 @@ public class step4_if_fn_do {
       MalList list = (MalList) ast;
 
       if ("[".equals(list.left)) {
-        rets = new MalMList();
-      }
-
-      if ("{".equals(list.left)) {
-        rets = new MalLList();
+        rets = new MalVector();
       }
 
       for (int i = 0; i < list.size(); i++) {
