@@ -2,7 +2,9 @@ package mal;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -231,6 +233,31 @@ public class core {
 
         atm.value = f.apply(rest);
         return atm.value;
+      }
+    });
+
+    ns.put(new MalSymbol("cons"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        MalType f1 = args.get(0);
+        MalList f2 = (MalList) args.get(1);
+
+        List<MalType> target = new ArrayList<>();
+        target.add(f1);
+        target.addAll(f2.malTypeList);
+
+        return new MalList(target);
+      }
+    });
+
+    ns.put(new MalSymbol("concat"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        List<MalType> targets = new ArrayList<>();
+        for (MalType malType : args.malTypeList) {
+          targets.addAll(((MalList) malType).malTypeList);
+        }
+        return new MalList(targets);
       }
     });
   }

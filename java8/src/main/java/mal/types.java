@@ -29,7 +29,7 @@ class MalList implements MalType {
     this.malTypeList = new ArrayList<>();
   }
 
-  MalList(List<MalType> malTypes) {
+  MalList(List malTypes) {
     this.malTypeList = malTypes;
     if (malTypeList == null) {
       this.malTypeList = new ArrayList<>();
@@ -99,35 +99,36 @@ class MalList implements MalType {
   }
 }
 
-class MalQuote implements MalType {
-  private String key;
-  private MalType mal;
-
+class MalQuote extends MalList {
   MalQuote(MalType type) {
-    this.mal = type;
-    key = "quote";
+    this.left = "(quote";
+    this.right = ")";
+    this.malTypeList = new ArrayList<>();
+    this.malTypeList.add(new MalSymbol("quote"));
+
+    this.malTypeList.add(type);
   }
 
   @Override
   public String toString() {
-    return "(" + key + " " + mal.toString() + ")";
+    return this.malTypeList.get(1).toString();
   }
 }
 
-class MalUnQuote implements MalType {
-  private String key;
-  private MalType mal;
-
+class MalUnQuote extends MalList {
   MalUnQuote(MalType type) {
-    this.mal = type;
-    key = "unquote";
+    super();
+    this.left = "(unquote";
+    this.right = ")";
+
+    this.malTypeList.add(new MalSymbol("unquote"));
+    this.malTypeList.add(type);
   }
 
   @Override
   public String toString() {
-    return "(" + key + " " + mal.toString() + ")";
+    return this.malTypeList.get(1).toString();
   }
-
 }
 
 class MalDeref extends MalList {
@@ -146,18 +147,19 @@ class MalDeref extends MalList {
 
 }
 
-class MalSpliceUnquote implements MalType {
-  private String key;
-  private MalType mal;
-
+class MalSpliceUnquote extends MalList {
   MalSpliceUnquote(MalType type) {
-    this.mal = type;
-    key = "splice-unquote";
+    super();
+    this.left = "(splice-unquote";
+    this.right = ")";
+
+    this.malTypeList.add(new MalSymbol("splice-unquote"));
+    this.malTypeList.add(type);
   }
 
   @Override
   public String toString() {
-    return "(" + key + " " + mal.toString() + ")";
+    return this.malTypeList.get(1).toString();
   }
 }
 
@@ -179,18 +181,20 @@ class MalWithMeta implements MalType {
 
 }
 
-class MalQuasiQuote implements MalType {
-  private String key;
-  private MalType mal;
+class MalQuasiQuote extends MalList {
 
   MalQuasiQuote(MalType type) {
-    this.mal = type;
-    key = "quasiquote";
+    super();
+    this.left = "(quasiquote";
+    this.right = ")";
+
+    this.malTypeList.add(new MalSymbol("quasiquote"));
+    this.malTypeList.add(type);
   }
 
   @Override
   public String toString() {
-    return "(" + key + " " + mal.toString() + ")";
+    return this.malTypeList.get(1).toString();
   }
 }
 
@@ -212,7 +216,7 @@ class MalHashMap implements MalType {
     list.right = "}";
     this.list = list;
 
-    for (int i = 0; i < list.size()/2; i++) {
+    for (int i = 0; i < list.size() / 2; i++) {
       map.put(((MalString) list.get(i)).value, list.get(i + 1));
     }
   }
