@@ -260,6 +260,47 @@ public class core {
         return new MalList(targets);
       }
     });
+
+    ns.put(new MalSymbol("nth"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        MalList f1 = (MalList) args.get(0);
+        MalInt f2 = (MalInt) args.get(1);
+        if (f1.size() <= f2.value) {
+          throw new core.OutOfIndexException();
+        }
+        return f1.get(f2.value);
+      }
+    });
+
+    ns.put(new MalSymbol("first"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        MalType f1 = args.get(0);
+        if (f1 instanceof MalNil) {
+          return new MalNil();
+        }
+        MalList ml = ((MalList)f1);
+        return ml.size() > 0 ? ml.get(0) : new MalNil();
+      }
+    });
+
+    ns.put(new MalSymbol("rest"), new MalFun() {
+      @Override
+      public MalType apply(MalList args) {
+        MalType f1 = args.get(0);
+        if (!(f1 instanceof MalList)) {
+          return new MalNil();
+        }
+
+        MalList list = (MalList) f1;
+        if (list.size() == 0) {
+          return new MalList();
+        }
+
+        return ((MalList) args.get(0)).rest();
+      }
+    });
   }
 
   static MalBool and(MalBool a, MalBool b) {
@@ -274,5 +315,8 @@ public class core {
       return new MalFalse();
     }
     return new MalTrue();
+  }
+
+  public static class OutOfIndexException extends RuntimeException {
   }
 }
