@@ -97,7 +97,8 @@ class reader {
     }
 
     if (token.startsWith("\"")) {
-      return new str(token);
+      String newToken = token.substring(1, token.length() - 1).replace("\\n", "\n").replace("\\\"", "\"").replace("\\\\", "\\");
+      return new str(newToken);
     }
 
     if (token.startsWith(":")) {

@@ -125,7 +125,7 @@ public class step4_if_fn_do {
   }
 
   static String PRINT(mal val) {
-    return printer.pr_str(val);
+    return printer.pr_str(val, true);
   }
 
   static String rep(String val, env.Env env) {

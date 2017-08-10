@@ -184,6 +184,9 @@ class str implements mal {
 
   @Override
   public boolean equals(Object obj) {
+    if (obj instanceof keyword) {
+      return false;
+    }
     return obj instanceof str && this.val.equals(((str) obj).val);
   }
 }
@@ -191,6 +194,11 @@ class str implements mal {
 class keyword extends str {
   keyword(String val) {
     super(val);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return obj instanceof keyword && this.val.equals(((keyword) obj).val);
   }
 }
 

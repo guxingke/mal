@@ -3,6 +3,7 @@ package step4_if_fn_do;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 class core {
   static Map<String, mal> ns = new HashMap<>();
@@ -144,6 +145,44 @@ class core {
                 return Integer.MIN_VALUE;
               });
           return reduce.get() == Integer.MIN_VALUE ? new False() : new True();
+        }
+    );
+
+    ns.put(
+        "pr-str",
+        (fun) args -> new str(args.data
+            .stream()
+            .map(it -> printer.pr_str(it, true))
+            .collect(Collectors.joining(" ")))
+    );
+
+    ns.put(
+        "str",
+        (fun) args -> new str(args.data
+            .stream()
+            .map(it -> printer.pr_str(it, false))
+            .collect(Collectors.joining("")))
+    );
+
+    ns.put(
+        "prn",
+        (fun) args -> {
+          System.out.println(args.data
+              .stream()
+              .map(it -> printer.pr_str(it, true))
+              .collect(Collectors.joining(" ")));
+          return new nil();
+        }
+    );
+
+    ns.put(
+        "println",
+        (fun) args -> {
+          System.out.println(args.data
+              .stream()
+              .map(it -> printer.pr_str(it, false))
+              .collect(Collectors.joining(" ")));
+          return new nil();
         }
     );
   }
