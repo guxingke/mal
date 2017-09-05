@@ -73,9 +73,6 @@ class list implements mal {
     }
     list target = (list) obj;
 
-    if (!target.toString().equals(this.toString())) {
-      return false;
-    }
 
     if (target.size() != this.size()) {
       return false;
@@ -85,6 +82,11 @@ class list implements mal {
       if (!this.get(i).equals(target.get(i))) {
         return false;
       }
+    }
+
+    if ((target.data.isEmpty() && target.data.isEmpty())
+        && !target.toString().equals(this.toString())) {
+      return false;
     }
 
     return true;
@@ -229,6 +231,27 @@ class hash_map extends list {
     return data.stream()
         .map(mal -> mal.toString(true))
         .collect(Collectors.joining(" ", "{", "}"));
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof hash_map)) {
+      return false;
+    }
+
+    hash_map map = (hash_map) obj;
+
+    for (String key : this.map.keySet()) {
+      if (!map.map.containsKey(key)) {
+        return false;
+      }
+
+      if (!this.map.get(key).equals(map.map.get(key))) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
 

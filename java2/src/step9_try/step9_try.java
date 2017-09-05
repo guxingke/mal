@@ -203,7 +203,7 @@ public class step9_try {
     if (ast instanceof symbol) {
       symbol symbol = ((symbol) ast);
       if (env.find(symbol.val) instanceof nil) {
-        throw new env.NotFoundException(symbol.toString(true) + " not found");
+        throw new env.NotFoundException("\'" + symbol.val + "\'" + " not found");
       } else {
         return env.get(symbol.val);
       }

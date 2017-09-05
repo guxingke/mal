@@ -325,7 +325,7 @@ class core {
     ns.put(
         "throw",
         (fun) args -> {
-          return new mal_exception(args.get(0).toString(true));
+          throw new mal_exception(args.get(0).toString(false));
         }
     );
 
@@ -411,6 +411,9 @@ class core {
     ns.put(
         "keyword?",
         (fun) args -> {
+          if (args.get(0) instanceof str && ((str) args.get(0)).val.startsWith(":")) {
+            return new True();
+          }
           return args.get(0) instanceof keyword ? new True() : new False();
         }
     );

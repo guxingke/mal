@@ -27,6 +27,15 @@ class printer {
       return pr_str(((list) val).data, "{", "}", print_readably);
     } else if (val instanceof list) {
       return pr_str(((list) val).data, "(", ")", print_readably);
+    } else if (val instanceof mal_exception) {
+      String message = ((mal_exception) val).getMessage();
+      if (print_readably) {
+        return "\"" + message
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n") + "\"";
+      }
+      return message;
     }
     return val.toString();
   }
