@@ -515,17 +515,24 @@ class core {
         "dissoc",
         (fun) args -> {
           hash_map map = (hash_map) args.get(0);
-          List<mal> data = new ArrayList<>(map.data);
+          Map<String, mal> data = new HashMap<String, mal>(map.map);
 
           for (mal key : args.rest().data) {
-            if (data.contains(key)) {
-              int i = data.indexOf(key);
-              data.remove(i);
-              data.remove(i+1);
+            if (data.containsKey(key.toString())) {
+              data.remove(key.toString());
             }
           }
+          List<mal> dd = new ArrayList<mal>();
+          data.forEach((key, val)->{
+            if (!key.startsWith(":")) {
+              dd.add(new str(key));
+            } else {
+              dd.add(new keyword(key));
+            }
+            dd.add(val);
+          });
 
-          return new hash_map(data);
+          return new hash_map(dd);
         }
     );
   }
