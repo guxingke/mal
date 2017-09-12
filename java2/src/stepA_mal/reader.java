@@ -16,35 +16,36 @@ class reader {
     if (token == null) {
       throw new EOFException();
     }
-
+    mal form;
     switch (token) {
+      case "'":
+      reader.next();
+      return new form(new symbol("quote"), read_form(reader));
+      case "`":
+      reader.next();
+      return new form(new symbol("quasiquote"), read_form(reader));
+      case "~":
+      reader.next();
+      return new form(new symbol("unquote"), read_form(reader));
+      case "@":
+      reader.next();
+      return new form(new symbol("deref"), read_form(reader));
+      case "~@":
+      reader.next();
+      return new form(new symbol("splice-unquote"), read_form(reader));
+      case "^":
+      reader.next();
+      mal meta = read_form(reader);
+      return new meta_form(read_form(reader), meta);
       case "(":
       case "[":
       case "{":
-        return read_list(reader);
-      case "'":
-        reader.next();
-        return new form(new symbol("quote"), read_form(reader));
-      case "`":
-        reader.next();
-        return new form(new symbol("quasiquote"), read_form(reader));
-      case "~":
-        reader.next();
-        return new form(new symbol("unquote"), read_form(reader));
-      case "@":
-        reader.next();
-        return new form(new symbol("deref"), read_form(reader));
-      case "~@":
-        reader.next();
-        return new form(new symbol("splice-unquote"), read_form(reader));
-      case "^":
-        reader.next();
-        mal meta = read_form(reader);
-        reader.next();
-        return new meta_form(read_form(reader), meta);
+        form = read_list(reader);
+        break;
       default:
-        return read_atom(reader);
+        form = read_atom(reader);
     }
+    return form;
   }
 
   static list read_list(Reader reader) {

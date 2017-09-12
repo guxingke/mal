@@ -1,7 +1,10 @@
 package stepA_mal;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -533,6 +536,65 @@ class core {
           });
 
           return new hash_map(dd);
+        }
+    );
+
+    ns.put(
+        "readline",
+        (fun) args -> {
+          String prompt = ((str) args.get(0)).val;
+
+          System.out.print(prompt);
+          BufferedReader buffer=new BufferedReader(new InputStreamReader(System.in));
+          String line= null;
+          try {
+            line = buffer.readLine();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+          if (line == null) {
+            return new nil();
+          }
+          return new str(line);
+        }
+    );
+
+    ns.put(
+        "meta",
+        (fun) args -> {
+          mal f1 = args.get(0);
+          if (!(f1 instanceof mv)) {
+            return new nil();
+          }
+          mv meta = ((mv) f1).meta;
+          if (meta == null) {
+            return new nil();
+          }
+          return meta;
+        }
+    );
+
+    ns.put(
+        "with-meta",
+        (fun) args -> {
+          mv copy = ((mv) args.get(0)).copy();
+          copy.meta = ((mv) args.get(1));
+          return copy;
+        }
+    );
+
+    ns.put(
+        "string?",
+        (fun) args -> {
+          mal f1 = args.get(0);
+          return f1 instanceof str ? new True() : new False();
+        }
+    );
+
+    ns.put(
+        "time-ms",
+        (fun) args -> {
+          return new number(((int) System.currentTimeMillis()));
         }
     );
   }

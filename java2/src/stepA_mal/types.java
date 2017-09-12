@@ -20,7 +20,13 @@ interface mal{
   }
 }
 
-class list implements mal {
+abstract class mv implements mal {
+  mv meta;
+
+  abstract mv copy();
+}
+
+class list extends mv {
   final List<mal> data;
 
   list() {
@@ -91,6 +97,11 @@ class list implements mal {
 
     return true;
   }
+
+  @Override
+  mv copy() {
+    return new list(this.data);
+  }
 }
 
 class vector extends list {
@@ -114,7 +125,7 @@ class vector extends list {
   }
 }
 
-class symbol implements mal {
+class symbol extends mv {
   final String val;
 
   symbol(String val) {
@@ -129,6 +140,11 @@ class symbol implements mal {
   @Override
   public boolean equals(Object obj) {
     return obj instanceof symbol && Objects.equals(((symbol) obj).val, this.val);
+  }
+
+  @Override
+  mv copy() {
+    return new symbol(this.val);
   }
 }
 
@@ -157,19 +173,27 @@ class form extends list {
     form form = (form) obj;
     return Objects.equals(form.key, this.key) && Objects.equals(form.data, this.data);
   }
+
+  @Override
+  mv copy() {
+    return new form(key, data);
+  }
 }
 
 class meta_form extends form {
-  final mal meta;
-
   meta_form(mal data, mal meta) {
     super(new symbol("with-meta"), data);
-    this.meta = meta;
+    this.meta = ((mv) meta);
   }
 
   @Override
   public String toString() {
     return new list(Arrays.asList(key, data, meta)).toString();
+  }
+
+  @Override
+  mv copy() {
+    return new meta_form(data, meta);
   }
 }
 
@@ -253,9 +277,14 @@ class hash_map extends list {
 
     return true;
   }
+
+  @Override
+  mv copy() {
+    return new hash_map(data);
+  }
 }
 
-class str implements mal {
+class str extends mv {
   final String val;
 
   str(String val) {
@@ -274,6 +303,11 @@ class str implements mal {
     }
     return obj instanceof str && this.val.equals(((str) obj).val);
   }
+
+  @Override
+  mv copy() {
+    return new str(val);
+  }
 }
 
 class keyword extends str {
@@ -290,9 +324,14 @@ class keyword extends str {
   public int hashCode() {
     return this.val.hashCode();
   }
+
+  @Override
+  mv copy() {
+    return new keyword(val);
+  }
 }
 
-class number implements mal {
+class number extends mv {
   final Integer val;
 
   number(Integer val) {
@@ -308,9 +347,14 @@ class number implements mal {
   public boolean equals(Object obj) {
     return obj instanceof number && Objects.equals(this.val, ((number) obj).val);
   }
+
+  @Override
+  mv copy() {
+    return new number(val);
+  }
 }
 
-class nil implements mal {
+class nil extends mv {
 
   @Override
   public String toString() {
@@ -321,9 +365,14 @@ class nil implements mal {
   public boolean equals(Object obj) {
     return obj instanceof nil;
   }
+
+  @Override
+  mv copy() {
+    return new nil();
+  }
 }
 
-class bool implements mal {
+abstract class bool extends mv {
 }
 
 class True extends bool {
@@ -342,6 +391,11 @@ class True extends bool {
   public boolean equals(Object obj) {
     return obj instanceof True;
   }
+
+  @Override
+  mv copy() {
+    return new True();
+  }
 }
 
 class False extends bool {
@@ -359,9 +413,14 @@ class False extends bool {
   public boolean equals(Object obj) {
     return obj instanceof False;
   }
+
+  @Override
+  mv copy() {
+    return new False();
+  }
 }
 
-class atom implements mal {
+class atom extends mv {
   mal val;
 
   atom(mal val) {
@@ -371,6 +430,11 @@ class atom implements mal {
   @Override
   public String toString() {
     return "(atom " + val.toString() + ")";
+  }
+
+  @Override
+  mv copy() {
+    return new atom(val);
   }
 }
 
@@ -398,19 +462,17 @@ interface fun extends ILambda, mal {
   }
 }
 
-abstract class fn implements mal, ILambda {
+abstract class fn extends mv implements ILambda, Cloneable {
   mal ast;
   env.Env env;
   list args;
   boolean is_macro;
 
-  fn() {
-  }
-
-  fn(mal ast, env.Env env, list args) {
+  fn(mal ast, env.Env env, list args, mv meta) {
     this.ast = ast;
     this.env = env;
     this.args = args;
+    this.meta = meta;
   }
 
   @Override
@@ -421,5 +483,20 @@ abstract class fn implements mal, ILambda {
   @Override
   public String toString() {
     return "#<function>";
+  }
+
+  @Override
+  mv copy() {
+    try {
+      fn clone = (fn) this.clone();
+      clone.ast = ast;
+      clone.env = env;
+      clone.args = args;
+      clone.is_macro = is_macro;
+      return clone;
+    } catch (CloneNotSupportedException e) {
+      e.printStackTrace();
+      throw new mal_exception("Could not copy fn");
+    }
   }
 }

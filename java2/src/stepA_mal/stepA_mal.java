@@ -80,7 +80,7 @@ public class stepA_mal {
           final mal f2 = ast.get(2);
           final env.Env currentEnv = env;
 
-          return new fn(f2, env, f1) {
+          return new fn(f2, env, f1, null) {
             @Override
             public mal apply(list args) {
               return EVAL(f2, new env.Env(currentEnv, f1, args));
@@ -209,6 +209,15 @@ public class stepA_mal {
       }
     }
 
+    if (ast instanceof meta_form) {
+      meta_form form  = (meta_form) ast;
+      List<mal> rets = new ArrayList<>();
+      rets.add(env.get("with-meta"));
+      rets.add(EVAL(form.data, env));
+      rets.add(EVAL(form.meta, env));
+      return new list(rets);
+    }
+
     if (ast instanceof hash_map) {
       hash_map hash_map = (hash_map) ast;
       List<mal> rets = hash_map.data.stream()
@@ -261,6 +270,7 @@ public class stepA_mal {
     );
 
     List<String> codes = Arrays.asList(
+        "(def! *host-language* \"java\")",
         "(def! not (fn* (a) (if a false true)))",
         "(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \")\" )))))",
         "(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))",
@@ -273,7 +283,7 @@ public class stepA_mal {
       return;
     }
 
-
+    EVAL(READ( "(println (str \"Mal [\" *host-language* \"]\"))"), repl_env);
     while (true) {
       System.out.print("user> ");
       BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
