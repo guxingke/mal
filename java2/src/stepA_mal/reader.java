@@ -92,7 +92,7 @@ class reader {
     String token = reader.next();
 
     try {
-      return new number(Integer.parseInt(token));
+      return new number(Long.parseLong(token));
     } catch (NumberFormatException e) {
       // do nothing
     }

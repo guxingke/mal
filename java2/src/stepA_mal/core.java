@@ -20,9 +20,9 @@ class core {
     ns.put(
         "+",
         (fun) args -> {
-          Integer ret = args.data.stream()
+          Long ret = args.data.stream()
               .map(item -> ((number) item).val)
-              .reduce(0, (left, right) -> left + right);
+              .reduce(0L, (left, right) -> left + right);
           return new number(ret);
         }
     );
@@ -30,7 +30,7 @@ class core {
     ns.put(
         "-",
         (fun) args -> {
-          Optional<Integer> ret = args.data.stream()
+          Optional<Long> ret = args.data.stream()
               .map(item -> ((number) item).val)
               .reduce((left, right) -> left - right);
           return new number(ret.get());
@@ -40,7 +40,7 @@ class core {
     ns.put(
         "/",
         (fun) args -> {
-          Optional<Integer> ret = args.data.stream()
+          Optional<Long> ret = args.data.stream()
               .map(item -> ((number) item).val)
               .reduce((left, right) -> left / right);
           return new number(ret.get());
@@ -50,9 +50,9 @@ class core {
     ns.put(
         "*",
         (fun) args -> {
-          Integer ret = args.data.stream()
+          Long ret = args.data.stream()
               .map(item -> ((number) item).val)
-              .reduce(1, (left, right) -> left * right);
+              .reduce(1L, (left, right) -> left * right);
           return new number(ret);
         }
     );
@@ -85,9 +85,9 @@ class core {
         "count",
         (fun) args -> {
           if (!(args.get(0) instanceof list)) {
-            return new number(0);
+            return new number(0L);
           }
-          return new number(((list) args.get(0)).size());
+          return new number(((long) ((list) args.get(0)).size()));
         }
     );
 
@@ -99,60 +99,60 @@ class core {
     ns.put(
         "<",
         (fun) args -> {
-          Optional<Integer> reduce = args.data.stream()
+          Optional<Long> reduce = args.data.stream()
               .map(item -> ((number) item).val)
               .reduce((left, right) -> {
                 if (left < right) {
                   return right;
                 }
-                return Integer.MAX_VALUE;
+                return Long.MAX_VALUE;
               });
-          return reduce.get() == Integer.MAX_VALUE ? new False() : new True();
+          return reduce.get() == Long.MAX_VALUE ? new False() : new True();
         }
     );
 
     ns.put(
         "<=",
         (fun) args -> {
-          Optional<Integer> reduce = args.data.stream()
+          Optional<Long> reduce = args.data.stream()
               .map(item -> ((number) item).val)
               .reduce((left, right) -> {
                 if (left <= right) {
                   return right;
                 }
-                return Integer.MAX_VALUE;
+                return Long.MAX_VALUE;
               });
-          return reduce.get() == Integer.MAX_VALUE ? new False() : new True();
+          return reduce.get() == Long.MAX_VALUE ? new False() : new True();
         }
     );
 
     ns.put(
         ">",
         (fun) args -> {
-          Optional<Integer> reduce = args.data.stream()
+          Optional<Long> reduce = args.data.stream()
               .map(item -> ((number) item).val)
               .reduce((left, right) -> {
                 if (left > right) {
                   return right;
                 }
-                return Integer.MIN_VALUE;
+                return Long.MIN_VALUE;
               });
-          return reduce.get() == Integer.MIN_VALUE ? new False() : new True();
+          return reduce.get() == Long.MIN_VALUE ? new False() : new True();
         }
     );
 
     ns.put(
         ">=",
         (fun) args -> {
-          Optional<Integer> reduce = args.data.stream()
+          Optional<Long> reduce = args.data.stream()
               .map(item -> ((number) item).val)
               .reduce((left, right) -> {
                 if (left >= right) {
                   return right;
                 }
-                return Integer.MIN_VALUE;
+                return Long.MIN_VALUE;
               });
-          return reduce.get() == Integer.MIN_VALUE ? new False() : new True();
+          return reduce.get() == Long.MIN_VALUE ? new False() : new True();
         }
     );
 
@@ -292,7 +292,7 @@ class core {
           if (f1.size() <= f2.val) {
             throw new core.OutOfIndexException();
           }
-          return f1.get(f2.val);
+          return f1.get(f2.val.intValue());
         }
     );
 
@@ -587,14 +587,70 @@ class core {
         "string?",
         (fun) args -> {
           mal f1 = args.get(0);
-          return f1 instanceof str ? new True() : new False();
+          return f1 instanceof str && !((str) f1).val.startsWith(":")? new True() : new False();
+        }
+    );
+
+    ns.put(
+        "conj",
+        (fun) args -> {
+          mv copy = ((mv) args.get(0)).copy();
+
+          if (copy instanceof vector) {
+            for (int i = 1; i < args.data.size(); i++) {
+              ((vector)copy).data.add(args.get(i));
+            }
+            return copy;
+          }
+
+          for (int i = 1; i < args.data.size(); i++) {
+            ((list)copy).data.add(0, args.get(i));
+          }
+
+          return copy;
+        }
+    );
+
+    // 接受一个 列表, 向量, 字符串或者 nil。
+    // 如果传入的是空列表，空向量，或空字符串("")，则返回 nil，
+    // 否则，
+    // 如果为列表，则原样返回，
+    // 如果是向量，则转换为列表并返回；
+    // 如果是字符串，则将字符串切分为单个字符的字符串列表并返回。
+    ns.put(
+        "seq",
+        (fun) args -> {
+          mal f1 = args.get(0);
+          if (f1 instanceof nil) {
+            return new nil();
+          }
+
+          if (f1 instanceof str) {
+            String val = ((str) f1).val;
+            if (val.isEmpty()) {
+              return new nil();
+            }
+            List<mal> strs = new ArrayList<>();
+            for (int i = 0; i < val.length(); i++) {
+              strs.add(new str(String.valueOf(val.charAt(i))));
+            }
+
+            return new list(strs);
+          }
+
+          list list = (list) f1;
+          if (list.size() == 0) {
+            return new nil();
+          }
+
+          return new list(list.data);
         }
     );
 
     ns.put(
         "time-ms",
         (fun) args -> {
-          return new number(((int) System.currentTimeMillis()));
+          return new number((System.currentTimeMillis()));
         }
     );
   }

@@ -123,6 +123,11 @@ class vector extends list {
         .map(mal -> mal.toString(true))
         .collect(Collectors.joining(" ", "[", "]"));
   }
+
+  @Override
+  mv copy() {
+    return new vector(this.data);
+  }
 }
 
 class symbol extends mv {
@@ -332,9 +337,9 @@ class keyword extends str {
 }
 
 class number extends mv {
-  final Integer val;
+  final Long val;
 
-  number(Integer val) {
+  number(Long val) {
     this.val = val;
   }
 
