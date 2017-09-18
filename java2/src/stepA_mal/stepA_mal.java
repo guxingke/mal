@@ -55,7 +55,7 @@ public class stepA_mal {
           }
 
           list bindingList = (list) binding;
-          for (int i = 0; i <= bindingList.size() / 2; i += 2) {
+          for (int i = 0; i < bindingList.size() ; i += 2) {
             innerEnv.set(((symbol) bindingList.get(i)).val, EVAL(((list) binding).get(i + 1), innerEnv));
           }
 
