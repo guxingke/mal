@@ -1,2 +1,2 @@
 #!/bin/bash
-exec java ${STEP:-stepA_mal}.${STEP:-stepA_mal} "${@}"
+exec java -cp $(dirname $0) ${STEP:-stepA_mal}.${STEP:-stepA_mal} "${@}"
