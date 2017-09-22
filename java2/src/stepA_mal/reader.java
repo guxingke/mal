@@ -20,23 +20,24 @@ class reader {
     switch (token) {
       case "'":
       reader.next();
-      return new form(new symbol("quote"), read_form(reader));
+      return read_shorthand(new symbol("quote"), read_form(reader));
       case "`":
       reader.next();
-      return new form(new symbol("quasiquote"), read_form(reader));
+      return read_shorthand(new symbol("quasiquote"), read_form(reader));
       case "~":
       reader.next();
-      return new form(new symbol("unquote"), read_form(reader));
+      return read_shorthand(new symbol("unquote"), read_form(reader));
       case "@":
       reader.next();
-      return new form(new symbol("deref"), read_form(reader));
+      return read_shorthand(new symbol("deref"), read_form(reader));
       case "~@":
       reader.next();
-      return new form(new symbol("splice-unquote"), read_form(reader));
+      return read_shorthand(new symbol("splice-unquote"), read_form(reader));
       case "^":
       reader.next();
       mal meta = read_form(reader);
-      return new meta_form(read_form(reader), meta);
+      mal data = read_form(reader);
+      return read_with_meta(new symbol("with-meta"), meta, data);
       case "(":
       case "[":
       case "{":
@@ -46,6 +47,21 @@ class reader {
         form = read_atom(reader);
     }
     return form;
+  }
+
+  private static list read_with_meta(symbol symbol, mal meta, mal data) {
+    list list = new list();
+    list.add(symbol);
+    list.add(data);
+    list.add(meta);
+    return list;
+  }
+
+  static list read_shorthand(symbol symbol, mal data) {
+    list list = new list();
+    list.add(symbol);
+    list.add(data);
+    return list;
   }
 
   static list read_list(Reader reader) {
@@ -64,16 +80,17 @@ class reader {
         reader.next();
         return vector;
       case "{":
-        hash_map map = new hash_map();
+        List<mal> data = new ArrayList<mal>();
         while (!reader.peek().equals("}")) {
-          map.add(read_form(reader));
+          data.add(read_form(reader));
 
           if (reader.peek() == null) {
             throw new EOFException("}");
           }
         }
         reader.next();
-        return map;
+
+        return new hash_map(data);
       default:
         list list = new list();
         while (!reader.peek().equals(")")) {

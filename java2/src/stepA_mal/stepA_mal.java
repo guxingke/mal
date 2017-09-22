@@ -55,7 +55,7 @@ public class stepA_mal {
           }
 
           list bindingList = (list) binding;
-          for (int i = 0; i < bindingList.size() ; i += 2) {
+          for (int i = 0; i < bindingList.size(); i += 2) {
             innerEnv.set(((symbol) bindingList.get(i)).val, EVAL(((list) binding).get(i + 1), innerEnv));
           }
 
@@ -114,14 +114,10 @@ public class stepA_mal {
 
           list list = (list) el;
           mal ff = list.get(0);
-          if (!(ff instanceof fun || ff instanceof fn)) {
+          if (!(ff instanceof fn)) {
             return list;
           }
 
-          if (ff instanceof fun) {
-            fun fun = ((fun) ff);
-            return fun.apply(list.rest());
-          }
           fn fn = ((fn) ff);
           if (fn.ast == null || fn.ast instanceof nil) {
             return fn.apply(((list) el).rest());
@@ -137,11 +133,7 @@ public class stepA_mal {
       symbol a0 = (symbol) ((list) ast).get(0);
       mal ret = env.get(a0.val);
 
-      if (ret instanceof fun) {
-        ast = ((fun) ret).apply(((list) ast).rest());
-      } else {
-        ast = ((fn) ret).apply(((list) ast).rest());
-      }
+      ast = ((fn) ret).apply(((list) ast).rest());
     }
     return ast;
   }
@@ -169,7 +161,10 @@ public class stepA_mal {
 
   private static mal quasiquote(mal ast) {
     if (!is_pair(ast)) {
-      return new form(new symbol("quote"), ast);
+      list list = new list();
+      list.add(new symbol("quote"));
+      list.add(ast);
+      return list;
     }
 
     mal a0 = ((list) ast).get(0);
@@ -207,15 +202,6 @@ public class stepA_mal {
       } else {
         return env.get(symbol.val);
       }
-    }
-
-    if (ast instanceof meta_form) {
-      meta_form form  = (meta_form) ast;
-      List<mal> rets = new ArrayList<>();
-      rets.add(env.get("with-meta"));
-      rets.add(EVAL(form.data, env));
-      rets.add(EVAL(form.meta, env));
-      return new list(rets);
     }
 
     if (ast instanceof hash_map) {
@@ -266,8 +252,14 @@ public class stepA_mal {
     final env.Env evalEnv = repl_env;
     repl_env.set(
         "eval",
-        (fun) args_ -> EVAL(args_.get(0), evalEnv)
+        new fn() {
+          @Override
+          public mal apply(list args) {
+            return EVAL(args.get(0), evalEnv);
+          }
+        }
     );
+
 
     List<String> codes = Arrays.asList(
         "(def! *host-language* \"java\")",
@@ -283,7 +275,7 @@ public class stepA_mal {
       return;
     }
 
-    EVAL(READ( "(println (str \"Mal [\" *host-language* \"]\"))"), repl_env);
+    EVAL(READ("(println (str \"Mal [\" *host-language* \"]\"))"), repl_env);
     while (true) {
       System.out.print("user> ");
       BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));

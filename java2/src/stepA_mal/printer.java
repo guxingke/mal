@@ -19,8 +19,6 @@ class printer {
       return ((str) val).val;
     } else if (val instanceof symbol) {
       return ((symbol) val).val;
-    } else if (val instanceof fun) {
-      return "#" + val;
     } else if (val instanceof vector) {
       return pr_str(((vector) val).data, "[", "]", print_readably);
     } else if (val instanceof hash_map) {

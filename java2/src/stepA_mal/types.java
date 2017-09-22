@@ -153,55 +153,6 @@ class symbol extends mv {
   }
 }
 
-class form extends list {
-  final symbol key;
-  final mal data;
-
-  form(symbol key, mal data) {
-    this.key = key;
-    this.data = data;
-    super.data.add(this.key);
-    super.data.add(this.data);
-  }
-
-  @Override
-  public String toString() {
-    return new list(Arrays.asList(key, data)).toString();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof form)) {
-      return false;
-    }
-
-    form form = (form) obj;
-    return Objects.equals(form.key, this.key) && Objects.equals(form.data, this.data);
-  }
-
-  @Override
-  mv copy() {
-    return new form(key, data);
-  }
-}
-
-class meta_form extends form {
-  meta_form(mal data, mal meta) {
-    super(new symbol("with-meta"), data);
-    this.meta = ((mv) meta);
-  }
-
-  @Override
-  public String toString() {
-    return new list(Arrays.asList(key, data, meta)).toString();
-  }
-
-  @Override
-  mv copy() {
-    return new meta_form(data, meta);
-  }
-}
-
 class hash_map extends list {
   Map<String, mal> map = new HashMap<>();
 
@@ -239,7 +190,13 @@ class hash_map extends list {
 
   list keys() {
     List<mal> data = this.map.keySet().stream()
-        .map(str::new).collect(Collectors.toList());
+        .map(key -> {
+          if (key.startsWith(":")) {
+            return new keyword(key);
+          }
+          return new str(key);
+        })
+        .collect(Collectors.toList());
     return new list(data);
   }
 
@@ -459,19 +416,21 @@ interface ILambda {
   mal apply(list args);
 }
 
-@FunctionalInterface
-interface fun extends ILambda, mal {
-  @Override
-  default String toString(boolean print_readably) {
-    return "#<function>";
-  }
-}
+//@FunctionalInterface
+//interface fun extends ILambda, mal {
+//  @Override
+//  default String toString(boolean print_readably) {
+//    return "#<function>";
+//  }
+//}
 
 abstract class fn extends mv implements ILambda, Cloneable {
   mal ast;
   env.Env env;
   list args;
   boolean is_macro;
+
+  fn() {}
 
   fn(mal ast, env.Env env, list args, mv meta) {
     this.ast = ast;
