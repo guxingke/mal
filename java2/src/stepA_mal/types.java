@@ -90,11 +90,6 @@ class list extends mv {
       }
     }
 
-    if ((target.data.isEmpty() && target.data.isEmpty())
-        && !target.toString().equals(this.toString())) {
-      return false;
-    }
-
     return true;
   }
 
