@@ -1,9 +1,7 @@
-%.class: src/%/
+%.class: src/mal/
 	@rm -rf $*
-	@mkdir $*
-	@javac src/$*/*.java -d .
+	@javac -cp lib/jline-2.13.jar src/mal/*.java -d .
 
 clean:
 	@rm -rf out/
-	@rm -rf setup/
-	@rm -rf step*
+	@rm -rf mal/
