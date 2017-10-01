@@ -497,6 +497,16 @@ mvn -quiet exec:java -Dexec.mainClass=mal.stepX_YYY
 mvn -quiet exec:java -Dexec.mainClass=mal.stepX_YYY -Dexec.args="CMDLINE_ARGS"
 ```
 
+### Java 1.8
+
+The Java implementation of mal, pure java, just require jdk.
+
+```
+cd java2
+make mal.stepA_mal.class
+./run
+```
+
 ### JavaScript/Node
 
 ```
